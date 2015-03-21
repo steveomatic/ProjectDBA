@@ -230,3 +230,7 @@ INSERT INTO calif_ejercicio VALUES(1,1,1,1);
 --Ejercicio 10
 --Crear los índices necesarios para agilizar las consultas. Al menos debe haber uno de mapa de bits
 --por asignatura y otro para poder buscar alumnos por sus apellidos en mayúsculas.
+CREATE BITMAP INDEX grupo_idx ON matricula(grupo);
+CREATE BITMAP INDEX matricula_asignatura_idx ON matricula(asignatura_asignatura_id);
+CREATE INDEX apellido_mayus_idx ON alumno(UPPER(apellido1));
+
