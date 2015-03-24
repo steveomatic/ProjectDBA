@@ -234,3 +234,19 @@ CREATE BITMAP INDEX grupo_idx ON matricula(grupo);
 CREATE BITMAP INDEX matricula_asignatura_idx ON matricula(asignatura_asignatura_id);
 CREATE INDEX apellido_mayus_idx ON alumno(UPPER(apellido1));
 
+select 'alter table '||table_name||' disable constraint '||constraint_name||';' from user_constraints;
+
+DELETE FROM asignatura
+WHERE asignatura_id = 1;
+
+alter table
+   asignatura
+add
+   (
+   min_puntos    NUMBER NOT NULL,
+   max_puntos    NUMBER NOT NULL
+   );
+
+INSERT INTO asignatura VALUES(1, 'ABD', 'Admin. Base de datos', '2cuat',50, 100);
+
+select 'alter table '||table_name||' enable constraint '||constraint_name||';' from user_constraints;
