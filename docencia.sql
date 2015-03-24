@@ -250,3 +250,11 @@ add
 INSERT INTO asignatura VALUES(1, 'ABD', 'Admin. Base de datos', '2cuat',50, 100);
 
 select 'alter table '||table_name||' enable constraint '||constraint_name||';' from user_constraints;
+
+DROP INDEX grupo_idx;
+DROP INDEX matricula_asignatura_idx;
+DROP INDEX apellido_mayus_idx;
+
+CREATE BITMAP INDEX grupo_idx ON matricula(grupo) tablespace ts_index;
+CREATE BITMAP INDEX matricula_asignatura_idx ON matricula(asignatura_asignatura_id) tablespace ts_index;
+CREATE INDEX apellido_mayus_idx ON alumno(UPPER(apellido1)) tablespace ts_index;
