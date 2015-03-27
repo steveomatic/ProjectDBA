@@ -258,3 +258,24 @@ DROP INDEX apellido_mayus_idx;
 CREATE BITMAP INDEX grupo_idx ON matricula(grupo) tablespace ts_index;
 CREATE BITMAP INDEX matricula_asignatura_idx ON matricula(asignatura_asignatura_id) tablespace ts_index;
 CREATE INDEX apellido_mayus_idx ON alumno(UPPER(apellido1)) tablespace ts_index;
+
+CREATE OR REPLACE VIEW Mis_notas_de_ejercicios AS
+SELECT nota as Nota, relacion_id AS Relación, ejercicio_ejercicio_id AS Ejercicio
+FROM calif_ejercicio, usuario
+WHERE UPPER(usuario.nombre) = UPPER(user);
+
+CREATE OR REPLACE VIEW Mis_Notas AS 
+SELECT nota, relacion_id AS Relación
+FROM notas_alumnos_sin_datos, usuario
+WHERE notas_alumnos_sin_datos.usuario_usuario_id = usuario.usuario_id
+AND UPPER(usuario.nombre) = UPPER(user);
+
+
+CREATE OR REPLACE VIEW Mis_Datos AS
+SELECT alumno.nombre || ' ' ||  alumno.apellido1 || ' ' || 
+alumno.apellido2 AS Nombre, alumno.dni, curso_academico AS "Curso Académico", grupo, expediente, alumno.fecha_alta AS "Fecha de alta",
+alumno.fecha_nacimiento AS "Fecha de nacimiento"
+FROM usuario, matricula, alumno
+WHERE matricula.usuario_usuario_id = usuario.usuario_id
+AND matricula.alumno_alumno_id = alumno.alumno_id
+AND UPPER(usuario.nombre) = UPPER(user);
