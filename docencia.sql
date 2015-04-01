@@ -178,6 +178,17 @@ AND matricula.alumno_alumno_id = alumno.alumno_id;
 
 
 
+--Ejercicio 7
+--Conectarse como administrador. Dar permisos al R_PROFESOR para:
+--1. Conectarse en practica2.sql
+
+--2. Añadir ejercicios al banco de preguntas (leer, insertar, modificar o borrar)
+GRANT delete, insert, update, select ON ejercicio TO r_profesor;
+--3. Ver los datos de todos los alumnos, incluyendo los puntos obtenidos
+GRANT select ON alumno TO r_profesor;
+--4. Modificar los puntos que un alumno obtiene en la solución de un ejercicio
+GRANT select, update ON calif_ejercicio TO r_profesor;
+
 
 --Ejercicio 8
 --Dar permisos a R_ALUMNO para:
