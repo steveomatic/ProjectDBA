@@ -288,3 +288,13 @@ INSERT INTO calif_ejercicio VALUES(1,1,1,2);
 INSERT INTO calif_ejercicio VALUES(1,1,1,3);
 INSERT INTO calif_ejercicio VALUES(0,1,1,4);
 INSERT INTO calif_ejercicio VALUES(0,1,1,5);
+
+CREATE OR REPLACE VIEW notas_alumnos AS
+SELECT asignatura.nombre as Asignatura, NOTA, relacion_id AS Relacion, alumno.nombre || ' ' ||  alumno.apellido1 || ' ' || 
+alumno.apellido2 AS Nombre, alumno.dni, curso_academico, grupo, expediente, alumno.fecha_alta AS "Fecha de alta",
+alumno.fecha_nacimiento AS "Fecha de nacimiento"
+FROM notas_alumnos_sin_datos, usuario, matricula, alumno, asignatura
+WHERE notas_alumnos_sin_datos.usuario_usuario_id = usuario.usuario_id 
+AND matricula.usuario_usuario_id = usuario.usuario_id
+AND matricula.alumno_alumno_id = alumno.alumno_id
+AND matricula.asignatura_asignatura_id = asignatura_id;
