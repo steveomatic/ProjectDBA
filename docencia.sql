@@ -279,3 +279,12 @@ FROM usuario, matricula, alumno
 WHERE matricula.usuario_usuario_id = usuario.usuario_id
 AND matricula.alumno_alumno_id = alumno.alumno_id
 AND UPPER(usuario.nombre) = UPPER(user);
+
+INSERT INTO ejercicio VALUES(2,1,'bla bla', 'sol', 0,1);
+INSERT INTO ejercicio VALUES(3,1,'bla bla', 'sol', 0,1);
+INSERT INTO ejercicio VALUES(4,1,'bla bla', 'sol', 0,1);
+INSERT INTO ejercicio VALUES(5,1,'bla bla', 'sol', 0,1);
+INSERT INTO calif_ejercicio VALUES(1,1,1,2);
+INSERT INTO calif_ejercicio VALUES(1,1,1,3);
+INSERT INTO calif_ejercicio VALUES(0,1,1,4);
+INSERT INTO calif_ejercicio VALUES(0,1,1,5);
