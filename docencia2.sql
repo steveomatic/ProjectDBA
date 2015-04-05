@@ -208,9 +208,7 @@ AS "Puntos restantes para 10"
 from asignatuRa, Mis_notas_total_por_asignatura 
 ;
 GRANT SELECT ON Mis_puntos_restantes TO R_alumno;
-desc asignatura
-select SUM(nota) from mis_notas_por_asignatura
-GROUP BY asignatura;
+
 ----------------------------------------------
 CREATE BITMAP INDEX grupo_idx ON matricula(grupo) tablespace ts_index;
 CREATE BITMAP INDEX matricula_asignatura_idx ON matricula(asignatura_asignatura_id) tablespace ts_index;
