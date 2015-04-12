@@ -171,7 +171,7 @@ GRANT select ON Mis_Datos TO R_ALUMNO;
 
 --3. Dar los permisos necesarios para que un alumno pueda ver los puntos que ha obtenido en cada ejercicio de cada relación
 CREATE VIEW Mis_notas_de_ejercicios AS
-SELECT nota as Nota, relacion_id AS Relación, ejercicio_ejercicio_id AS Ejercicio
+SELECT nota as Nota, relacion_relacion_id AS Relación, ejercicio_ejercicio_id AS Ejercicio
 FROM calif_ejercicio, usuario
 WHERE UPPER(usuario.nombre) = UPPER(user);
 GRANT SELECT ON Mis_notas_de_ejercicios TO R_ALUMNO;
