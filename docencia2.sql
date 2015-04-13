@@ -127,20 +127,19 @@ GRANT INSERT, DELETE, ALTER on DOCENCIA.MATRICULA TO R_ADMINISTRATIVO;
 --(a partir de los cuales ya no se pueden pedir más relaciones). También podrá modificar el número de ejercicios de que consta una relación.
 
 -- Creo una vista auxiliar que me da las notas de las relaciones de todos los alumnos, pero no me da los datos de estos.
-CREATE VIEW Notas_alumnos_sin_datos AS 
-SELECT SUM(NOTA) AS nota, relacion_relacion_id, usuario_usuario_id
-FROM calif_ejercicio 
-GROUP BY relacion_relacion_id, usuario_usuario_id;
+CREATE VIEW Notas_alumnos_sin_datos AS
+SELECT asignatura_id, relacion_relacion_id, SUM(NOTA) AS nota, usuario_usuario_id
+FROM calif_ejercicio
+GROUP BY asignatura_id, relacion_relacion_id, usuario_usuario_id;
 
 CREATE VIEW notas_alumnos AS
-SELECT asignatura.nombre as Asignatura, NOTA, relacion_relacion_id AS Relacion, alumno.nombre || ' ' ||  alumno.apellido1 || ' ' || 
+SELECT asignatura.nombre as Asignatura, relacion_relacion_id AS Relacion, NOTA, alumno.nombre || ' ' || alumno.apellido1 || ' ' ||
 alumno.apellido2 AS Nombre, alumno.dni, curso_academico, grupo, expediente, alumno.fecha_alta AS "Fecha de alta",
 alumno.fecha_nacimiento AS "Fecha de nacimiento"
-FROM notas_alumnos_sin_datos, usuario, matricula, alumno, asignatura
-WHERE notas_alumnos_sin_datos.usuario_usuario_id = usuario.usuario_id 
+FROM Notas_alumnos_sin_datos, usuario, matricula, alumno, asignatura
+WHERE Notas_alumnos_sin_datos.usuario_usuario_id = usuario.usuario_id
 AND matricula.usuario_usuario_id = usuario.usuario_id
-AND matricula.alumno_alumno_id = alumno.alumno_id
-AND matricula.asignatura_asignatura_id = asignatura_id;
+AND matricula.alumno_alumno_id = alumno.alumno_id;
 
 GRANT SELECT ON notas_alumnos TO r_administrativo;
 
@@ -170,34 +169,29 @@ AND UPPER(usuario.nombre) = UPPER(user);
 GRANT select ON Mis_Datos TO R_ALUMNO;
 
 
-CREATE OR REPLACE VIEW Mis_Notas AS 
-SELECT nota, relacion_relacion_id AS Relación
-FROM notas_alumnos_sin_datos, usuario
-WHERE notas_alumnos_sin_datos.usuario_usuario_id = usuario.usuario_id
-AND UPPER(usuario.nombre) = UPPER(user);
-
-GRANT select ON Mis_Notas TO R_ALUMNO;
-
-CREATE OR REPLACE VIEW Mis_notas_de_ejercicios AS
+--3. Dar los permisos necesarios para que un alumno pueda ver los puntos que ha obtenido en cada ejercicio de cada relación
+CREATE VIEW Mis_notas_de_ejercicios AS
 SELECT nota as Nota, relacion_relacion_id AS Relación, ejercicio_ejercicio_id AS Ejercicio
 FROM calif_ejercicio, usuario
 WHERE UPPER(usuario.nombre) = UPPER(user);
-
 GRANT SELECT ON Mis_notas_de_ejercicios TO R_ALUMNO;
+
+--4. Dar los permisos necesarios para que un alumno pueda ver los puntos totales que ha obtenido en cada relación
+CREATE VIEW Mis_Notas AS 
+SELECT asignatura.nombre AS Asignatura,  relacion_relacion_id AS Relación, nota
+FROM notas_alumnos_sin_datos, usuario, asignatura
+WHERE notas_alumnos_sin_datos.usuario_usuario_id = usuario.usuario_id
+AND notas_alumnos_sin_datos.asignatura_id = asignatura.asignatura_id
+AND UPPER(usuario.nombre) = UPPER(user);
+
+GRANT select ON Mis_Notas TO R_ALUMNO;
 ------------------------------
---5
---auxiliar
-CREATE VIEW Mis_notas_por_asignatura AS
-SELECT Nombre as Asignatura, nota, mis_notas."RELACIÓN"
-from mis_notas, relacion, asignatura
-WHERE mis_notas.relación = relacion.relacion_id
-AND relacion.ASIGNATURA_ASIGNATURA_ID = asignatura.asignatura_id;
-
-GRANT SELECT ON Mis_notas_por_asignatura TO r_alumno;
+--5. Dar los permisos necesarios para que un alumno pueda ver los puntos totales que lleva acumulados y los que le faltan para
+--llegar al mínimo de la asignatura y al máximo.
 
 --auxiliar
-create view Mis_notas_total_por_asignatura AS
-select asignatura, SUM(nota) AS nota from mis_notas_por_asignatura
+Create view Mis_notas_total_por_asignatura AS
+select asignatura, SUM(nota) AS nota from mis_notas
 GROUP BY asignatura;
 GRANT SELECT ON Mis_notas_total_por_asignatura TO R_alumno;
 
@@ -206,9 +200,10 @@ CREATE VIEW Mis_puntos_restantes AS
 select asignatura, asignatura.min_puntos - mis_notas_total_por_asignatura.nota
 AS "Puntos restantes para aprobar", asignatura.max_puntos-nota
 AS "Puntos restantes para 10"
-from asignatuRa, Mis_notas_total_por_asignatura 
-;
+from asignatura, Mis_notas_total_por_asignatura ;
 GRANT SELECT ON Mis_puntos_restantes TO R_alumno;
+--6. Dar los permisos necesarios para que un alumno pueda ver los N alumnos que más puntos llevan acumulados. 
+--Para ello se creará un procedimiento que creará una tabla temporal con esos datos. (Por ahora no hay que hacerlo)
 
 ----------------------------------------------
 CREATE BITMAP INDEX grupo_idx ON matricula(grupo) tablespace ts_index;
@@ -222,22 +217,21 @@ INSERT INTO alumno VALUES (1, '12345678A', 'Haritz', 'Puerto', 'San Román', '00
 INSERT INTO matricula VALUES('14/15', 'A', 1, 1, 1);
 INSERT INTO ejercicio VALUES(1, 1, 'Muestra sysdate', 'SELECT sysdate FROM dual;', 0, 1);
 INSERT into relacion VALUES (1,1,1,1);
-INSERT INTO calif_ejercicio VALUES(1,1,1,1,1);
+INSERT INTO calif_ejercicio VALUES(1,1,1,1,1, 'skfjlsdf');
 INSERT INTO ejercicio VALUES(2,1,'bla bla', 'sol', 0,1);
 INSERT INTO ejercicio VALUES(3,1,'bla bla', 'sol', 0,1);
 INSERT INTO ejercicio VALUES(4,1,'bla bla', 'sol', 0,1);
 INSERT INTO ejercicio VALUES(5,1,'bla bla', 'sol', 0,1);
-INSERT INTO calif_ejercicio VALUES(1,1,1,2,1);
-INSERT INTO calif_ejercicio VALUES(1,1,1,3,1);
-INSERT INTO calif_ejercicio VALUES(0,1,1,4,1);
-INSERT INTO calif_ejercicio VALUES(0,1,1,5,1);
-
+INSERT INTO calif_ejercicio VALUES(1,1,1,2,1,'fsafas');
+INSERT INTO calif_ejercicio VALUES(1,1,1,3,1,'asfasdf');
+INSERT INTO calif_ejercicio VALUES(0,1,1,4,1,'asdfasf');
+INSERT INTO calif_ejercicio VALUES(0,1,1,5,1,'asfddasf');
 INSERT INTO ejercicio VALUES(6,1,'bla bla', 'sol', 0,1);
 INSERT INTO ejercicio VALUES(7,1,'bla bla', 'sol', 0,1);
 INSERT INTO ejercicio VALUES(8,1,'bla bla', 'sol', 0,1);
 INSERT INTO ejercicio VALUES(9,1,'bla bla', 'sol', 0,1);
 INSERT into relacion VALUES (2,2,1,1);
-INSERT INTO calif_ejercicio VALUES(1,1,2,6,1);
-INSERT INTO calif_ejercicio VALUES(1,1,2,7,1);
-INSERT INTO calif_ejercicio VALUES(0,1,2,8,1);
-INSERT INTO calif_ejercicio VALUES(0,1,2,9,1);
+INSERT INTO calif_ejercicio VALUES(1,1,2,6,1,'adfas');
+INSERT INTO calif_ejercicio VALUES(1,1,2,7,1,'fgfhgg');
+INSERT INTO calif_ejercicio VALUES(0,1,2,8,1,'werwr');
+INSERT INTO calif_ejercicio VALUES(0,1,2,9,1,'rqwer');
