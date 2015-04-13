@@ -210,12 +210,12 @@ CREATE BITMAP INDEX grupo_idx ON matricula(grupo) tablespace ts_index;
 CREATE BITMAP INDEX matricula_asignatura_idx ON matricula(asignatura_asignatura_id) tablespace ts_index;
 CREATE INDEX apellido_mayus_idx ON alumno(UPPER(apellido1)) tablespace ts_index;
 
-create sequence asignatura_seq start with 1 increment by 1;
-create sequence alumno_seq start with 1 increment by 1;
-create sequence ejercicio_seq start with 1 increment by 1;
-create sequence profesor_seq start with 1 increment by 1;
-create sequence relacion_seq start with 1 increment by 1;
-create sequence usuario_seq start with 1 increment by 1;
+create sequence asignatura_seq start with 0 increment by 1;
+create sequence alumno_seq start with 0 increment by 1;
+create sequence ejercicio_seq start with 0 increment by 1;
+create sequence profesor_seq start with 0 increment by 1;
+create sequence relacion_seq start with 0 increment by 1;
+create sequence usuario_seq start with 0 increment by 1;
 
 INSERT INTO usuario VALUES(usuario_seq.NEXTVAL,'Godel');
 INSERT INTO usuario VALUES(usuario_seq.NEXTVAL,'Russell');
