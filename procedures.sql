@@ -39,6 +39,23 @@ PACKAGE BODY GEST_USUARIO AS
     DBMS_OUTPUT.put_line('''alter system kill session '||VAR_SID||','||VAR_SERIAL#||''');
     
   END MATAR_SESION;
+  
+  
+  PROCEDURE CREAR_USUARIOS(asignatura IN VARCHAR2, numero IN NUMBER) IS 
+    var_counter number(6) ;
+    n pls_integer;
+    str varchar(4);
+    BEGIN
+       var_counter := 0;
+       DBMS_OUTPUT.PUT_LINE('HOLA');
+        FOR VAR_COUNTER IN 1..numero LOOP 
+          n := SEQ_CREA_USUARIOS.NEXTVAL;
+          str := DBMS_RANDOM.STRING('U', 4);
+          --EXECUTE IMMEDIATE 'CREATE USER ' || asignatura || ''||n|| ' IDENTIFIED BY ' || asignatura||''||n;
+          DBMS_OUTPUT.PUT_LINE('CREATE USER ' || ASIGNATURA || str || 'IDENTIFIED BY ' || ASIGNATURA || str);
+          --SYS.DBMS_OUTPUT.PUT_LINE('Usuario '|| ' creado correctamente');
+        END LOOP;
+ END CREAR_USUARIOS;
 
 
 END GEST_USUARIO;
