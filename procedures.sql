@@ -7,15 +7,33 @@ PACKAGE BODY GEST_USUARIO AS
     EXECUTE IMMEDIATE 'CREATE USER ' || usuario || ' IDENTIFIED BY ' || pass;
     SYS.dbms_output.put_line('Usuario ' || usuario || ' creado correctamente');
     EXCEPTION
-    WHEN OTHERS THEN dbms_output.put_line('ERROR');
+    WHEN OTHERS THEN 
+    IF SQLCODE = -1031
+    then
+    DBMS_OUTPUT.put_line('Error, no se tenian privilegios suficientes');
+  
+    ROLLBACK;
+    ELSE
+    dbms_output.put_line('Error desconocido');
+    ROLLBACK;
+    END IF;
   END CREAR_USUARIO;
-
+ 
   PROCEDURE BORRAR_USUARIO(usuario IN VARCHAR2) IS
   BEGIN
     EXECUTE IMMEDIATE 'DROP USER ' || usuario || ' CASCADE';
     SYS.dbms_output.put_line('Usuario ' || usuario || ' borrado correctamente');
     EXCEPTION
-    WHEN OTHERS THEN dbms_output.put_line('ERROR');
+    WHEN OTHERS THEN 
+     IF SQLCODE = -1031
+    then
+    DBMS_OUTPUT.put_line('Error, no se tenian privilegios suficientes');
+  
+    ROLLBACK;
+    ELSE
+    dbms_output.put_line('Error desconocido');
+    ROLLBACK;
+    END IF;
   END BORRAR_USUARIO;
   
   PROCEDURE BLOQUEAR_USUARIO(usuario IN VARCHAR2) IS
@@ -23,7 +41,16 @@ PACKAGE BODY GEST_USUARIO AS
     EXECUTE IMMEDIATE 'ALTER USER ' || usuario || ' ACCOUNT LOCK';
     SYS.dbms_output.put_line('Usuario ' || usuario || ' bloqueado correctamente');
     EXCEPTION
-    WHEN OTHERS THEN dbms_output.put_line('ERROR');
+    WHEN OTHERS THEN 
+    IF SQLCODE = -1031
+    then
+    DBMS_OUTPUT.put_line('Error, no se tenian privilegios suficientes');
+  
+    ROLLBACK;
+    ELSE
+    dbms_output.put_line('Error desconocido');
+    ROLLBACK;
+    END IF;
   END BLOQUEAR_USUARIO;
   
   PROCEDURE DESBLOQUEAR_USUARIO(usuario IN VARCHAR2) IS
@@ -31,7 +58,16 @@ PACKAGE BODY GEST_USUARIO AS
     EXECUTE IMMEDIATE 'ALTER USER ' || usuario || ' ACCOUNT LOCK';
     SYS.dbms_output.put_line('Usuario ' || usuario || ' bloqueado correctamente');
     EXCEPTION
-    WHEN OTHERS THEN dbms_output.put_line('ERROR');
+    WHEN OTHERS THEN 
+     IF SQLCODE = -1031
+    then
+    DBMS_OUTPUT.put_line('Error, no se tenian privilegios suficientes');
+  
+    ROLLBACK;
+    ELSE
+    dbms_output.put_line('Error desconocido');
+    ROLLBACK;
+    END IF;
   END DESBLOQUEAR_USUARIO;
   
   /**
