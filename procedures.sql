@@ -24,7 +24,7 @@ PACKAGE BODY GEST_USUARIO AS
   BEGIN
     EXECUTE IMMEDIATE 'ALTER USER ' || usuario || ' ACCOUNT LOCK';
     SYS.dbms_output.put_line('Usuario ' || usuario || ' bloqueado correctamente');
-  END DESBLOQUEAR_USARIO;
+  END DESBLOQUEAR_USUARIO;
   
   
   PROCEDURE MATAR_SESION (usuario IN VARCHAR2) IS
