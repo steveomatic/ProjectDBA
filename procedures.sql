@@ -35,8 +35,8 @@ PACKAGE BODY GEST_USUARIO AS
   
   BEGIN
     BEGIN
-      select sid into VAR_SID from v$session where username = usuario;
-      select serial# into VAR_SERIAL# from v$session where username = usuario;
+      select sid into VAR_SID from v_$session where username = usuario;
+      select serial# into VAR_SERIAL# from v_$session where username = usuario;
       exception when no_data_found then
       raise ERROR_USUARIO_NO_EXISTE;
       --DBMS_OUTPUT.put_line('alter system kill session '||''''||VAR_SID||','||VAR_SERIAL#|| '#'|| '''');
