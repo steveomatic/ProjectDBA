@@ -13,3 +13,6 @@ GRANT SELECT ON mis_notas_de_ejercicios TO R_alumno;
 CREATE PUBLIC SYNONYM notas_alumnos
 FOR docencia.notas_alumnos;
 GRANT SELECT ON notas_alumnos TO r_administrativo;
+
+
+create public synonym v_$session for v_$session;
