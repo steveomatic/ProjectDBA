@@ -6,24 +6,32 @@ PACKAGE BODY GEST_USUARIO AS
   BEGIN
     EXECUTE IMMEDIATE 'CREATE USER ' || usuario || ' IDENTIFIED BY ' || pass;
     SYS.dbms_output.put_line('Usuario ' || usuario || ' creado correctamente');
+    EXCEPTION
+    WHEN OTHERS THEN dbms_output.put_line('ERROR');
   END CREAR_USUARIO;
 
   PROCEDURE BORRAR_USUARIO(usuario IN VARCHAR2) IS
   BEGIN
     EXECUTE IMMEDIATE 'DROP USER ' || usuario || ' CASCADE';
     SYS.dbms_output.put_line('Usuario ' || usuario || ' borrado correctamente');
+    EXCEPTION
+    WHEN OTHERS THEN dbms_output.put_line('ERROR');
   END BORRAR_USUARIO;
   
   PROCEDURE BLOQUEAR_USUARIO(usuario IN VARCHAR2) IS
   BEGIN
     EXECUTE IMMEDIATE 'ALTER USER ' || usuario || ' ACCOUNT LOCK';
     SYS.dbms_output.put_line('Usuario ' || usuario || ' bloqueado correctamente');
+    EXCEPTION
+    WHEN OTHERS THEN dbms_output.put_line('ERROR');
   END BLOQUEAR_USUARIO;
   
   PROCEDURE DESBLOQUEAR_USUARIO(usuario IN VARCHAR2) IS
   BEGIN
     EXECUTE IMMEDIATE 'ALTER USER ' || usuario || ' ACCOUNT LOCK';
     SYS.dbms_output.put_line('Usuario ' || usuario || ' bloqueado correctamente');
+    EXCEPTION
+    WHEN OTHERS THEN dbms_output.put_line('ERROR');
   END DESBLOQUEAR_USARIO;
   
   
