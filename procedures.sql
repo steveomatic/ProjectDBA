@@ -28,21 +28,28 @@ PACKAGE BODY GEST_USUARIO AS
   
   
   PROCEDURE MATAR_SESION (usuario IN VARCHAR2) IS
+  
   VAR_SID v_$session.sid%TYPE;
   VAR_SERIAL# v_$session.serial#%TYPE;
-   
+  ERROR_USUARIO_NO_EXISTE exception;
+  
   BEGIN
     BEGIN
-    select sid 
-    into VAR_SID 
-    from v_$session 
-    where username = usuario;
-
+      select sid into VAR_SID from v$session where username = usuario;
+      select serial# into VAR_SERIAL# from v$session where username = usuario;
+      exception when no_data_found then
+      raise ERROR_USUARIO_NO_EXISTE;
+      --DBMS_OUTPUT.put_line('alter system kill session '||''''||VAR_SID||','||VAR_SERIAL#|| '#'|| '''');
     END;
-    select serial# into VAR_SERIAL# from v$session where username = usuario;
-    --DBMS_OUTPUT.put_line('alter system kill session '||''''||VAR_SID||','||VAR_SERIAL#|| '#'|| '''');
+  BEGIN
     EXECUTE IMMEDIATE 'alter system kill session '''||VAR_SID||','||VAR_SERIAL#||''' ';
-    
+    exception when others then DBMS_OUTPUT.put_line('Error al matar sesión.');
+  END;  
+  
+  exception
+    when ERROR_USUARIO_NO_EXISTE then DBMS_OUTPUT.put_line('El usuario '||usuario||' no existe.');
+    when others then DBMS_OUTPUT.put_line('Error desconocido.');
+  
   END MATAR_SESION;
 
 
