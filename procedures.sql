@@ -32,16 +32,27 @@ PACKAGE BODY GEST_USUARIO AS
     SYS.dbms_output.put_line('Usuario ' || usuario || ' bloqueado correctamente');
     EXCEPTION
     WHEN OTHERS THEN dbms_output.put_line('ERROR');
-  END DESBLOQUEAR_USARIO;
+  END DESBLOQUEAR_USUARIO;
   
-  
+  /**
+  *
+  * EXCESIVAMENTE IMPORTANTE: 
+  * Para poder compilar esto el usuario tiene que tener grant 
+  * expreso por parte de sysdba
+  * Excepciones: 
+  */
   PROCEDURE MATAR_SESION (usuario IN VARCHAR2) IS
-  --EXCESIVAMENTE IMPORTANTE: Para poder compilar esto el usuario tiene que tener grant expreso por parte de sysdba
   VAR_SID v$session.sid%TYPE;
   VAR_SERIAL# v$session.serial#%TYPE;
   
   BEGIN
-    select sid into VAR_SID from v$session where username = usuario;
+    BEGIN
+    select sid 
+    into VAR_SID 
+    from v$session 
+    where username = usuario;
+
+    END;
     select serial# into VAR_SERIAL# from v$session where username = usuario;
     EXECUTE IMMEDIATE '''alter system kill session '||VAR_SID||','||VAR_SERIAL#||''';
     DBMS_OUTPUT.put_line('''alter system kill session '||VAR_SID||','||VAR_SERIAL#||''');
