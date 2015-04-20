@@ -45,7 +45,7 @@ PACKAGE BODY GEST_USUARIO AS
     var_counter number(6) ;
     n pls_integer;
     str varchar(4);
-    BEGIN
+  BEGIN
     var_counter := 0;
     DBMS_OUTPUT.PUT_LINE('HOLA');
     FOR VAR_COUNTER IN 1..numero LOOP 
