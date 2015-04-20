@@ -40,8 +40,8 @@ PACKAGE BODY GEST_USUARIO AS
 
     END;
     select serial# into VAR_SERIAL# from v$session where username = usuario;
-    EXECUTE IMMEDIATE 'alter system kill session '||VAR_SID||','||VAR_SERIAL# ; 
-    DBMS_OUTPUT.put_line('alter system kill session '||VAR_SID||','||VAR_SERIAL#);
+    --DBMS_OUTPUT.put_line('alter system kill session '||''''||VAR_SID||','||VAR_SERIAL#|| '#'|| '''');
+    EXECUTE IMMEDIATE 'alter system kill session '''||VAR_SID||','||VAR_SERIAL#||''' ';
     
   END MATAR_SESION;
 
