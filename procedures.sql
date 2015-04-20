@@ -3,20 +3,25 @@ PACKAGE BODY GEST_USUARIO AS
 
   /* TODO enter package declarations (types, exceptions, methods etc) here */ 
   PROCEDURE CREAR_USUARIO(usuario IN VARCHAR2, pass IN VARCHAR2) IS 
-  BEGIN
-    EXECUTE IMMEDIATE 'CREATE USER ' || usuario || ' IDENTIFIED BY ' || pass;
-    SYS.dbms_output.put_line('Usuario ' || usuario || ' creado correctamente');
-    EXCEPTION
-    WHEN OTHERS THEN 
-    IF SQLCODE = -1031
-    then
-    DBMS_OUTPUT.put_line('Error, no se tenian privilegios suficientes');
-  
-    ROLLBACK;
-    ELSE
-    dbms_output.put_line('Error desconocido');
-    ROLLBACK;
-    END IF;
+   ERROR_PRIVS_INSUF exception;
+ ERROR_USUARIO_EXISTE exception;
+ ERROR_DESCONOCIDO exception;
+ BEGIN
+    BEGIN
+      EXECUTE IMMEDIATE 'CREATE USER ' || usuario || ' IDENTIFIED BY ' || pass;
+     DBMS_OUTPUT.PUT_LINE('Usuario ' || usuario || ' creado correctamente');
+      EXCEPTION WHEN OTHERS THEN 
+      ROLLBACK;
+      IF SQLCODE = -1031 then raise ERROR_PRIVS_INSUF;
+      ELSIF SQLCODE = -1920 then raise ERROR_USUARIO_EXISTE;
+      ELSE raise ERROR_DESCONOCIDO;
+      END IF;
+    END;
+    
+    exception
+    when ERROR_PRIVS_INSUF then DBMS_OUTPUT.put_line('Error: no se tienen privilegios suficientes');
+    when ERROR_USUARIO_EXISTE then dbms_output.put_line('Error: el usuario ' || usuario || ' ya existe');
+    when ERROR_DESCONOCIDO then DBMS_OUTPUT.put_line('Error desconocido');
   END CREAR_USUARIO;
  
   PROCEDURE BORRAR_USUARIO(usuario IN VARCHAR2) IS
@@ -77,23 +82,31 @@ PACKAGE BODY GEST_USUARIO AS
   * expreso por parte de sysdba
   * Excepciones: 
   */
-  PROCEDURE MATAR_SESION (usuario IN VARCHAR2) IS
-  VAR_SID v$session.sid%TYPE;
-  VAR_SERIAL# v$session.serial#%TYPE;
+    PROCEDURE MATAR_SESION (usuario IN VARCHAR2) IS
+  
+  VAR_SID v_$session.sid%TYPE;
+  VAR_SERIAL# v_$session.serial#%TYPE;
+  ERROR_USUARIO_NO_EXISTE exception;
   
   BEGIN
     BEGIN
-    select sid 
-    into VAR_SID 
-    from v$session 
-    where username = usuario;
-
+      select sid into VAR_SID from v_$session where username = usuario;
+      select serial# into VAR_SERIAL# from v_$session where username = usuario;
+      exception when no_data_found then
+      raise ERROR_USUARIO_NO_EXISTE;
+      --DBMS_OUTPUT.put_line('alter system kill session '||''''||VAR_SID||','||VAR_SERIAL#|| '#'|| '''');
     END;
-    select serial# into VAR_SERIAL# from v$session where username = usuario;
-    EXECUTE IMMEDIATE '''alter system kill session '||VAR_SID||','||VAR_SERIAL#||''';
-    DBMS_OUTPUT.put_line('''alter system kill session '||VAR_SID||','||VAR_SERIAL#||''');
-    
+  BEGIN
+    EXECUTE IMMEDIATE 'alter system kill session '''||VAR_SID||','||VAR_SERIAL#||''' ';
+    exception when others then DBMS_OUTPUT.put_line('Error al matar sesión.');
+  END;  
+  
+  exception
+    when ERROR_USUARIO_NO_EXISTE then DBMS_OUTPUT.put_line('El usuario '||usuario||' no tiene la sesión iniciada.');
+    when others then DBMS_OUTPUT.put_line('Error desconocido.');
+  
   END MATAR_SESION;
+
 
 
 END GEST_USUARIO;
