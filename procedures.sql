@@ -47,7 +47,7 @@ PACKAGE BODY GEST_USUARIO AS
   END;  
   
   exception
-    when ERROR_USUARIO_NO_EXISTE then DBMS_OUTPUT.put_line('El usuario '||usuario||' no existe.');
+    when ERROR_USUARIO_NO_EXISTE then DBMS_OUTPUT.put_line('El usuario '||usuario||' no tiene la sesión iniciada.');
     when others then DBMS_OUTPUT.put_line('Error desconocido.');
   
   END MATAR_SESION;
