@@ -25,20 +25,25 @@ PACKAGE BODY GEST_USUARIO AS
   END CREAR_USUARIO;
  
   PROCEDURE BORRAR_USUARIO(usuario IN VARCHAR2) IS
-  BEGIN
-    EXECUTE IMMEDIATE 'DROP USER ' || usuario || ' CASCADE';
-    SYS.dbms_output.put_line('Usuario ' || usuario || ' borrado correctamente');
-    EXCEPTION
-    WHEN OTHERS THEN 
-     IF SQLCODE = -1031
-    then
-    DBMS_OUTPUT.put_line('Error, no se tenian privilegios suficientes');
+  ERROR_PRIVS_INSUF exception;
+  ERROR_USUARIO_NO_EXISTE exception;
+  ERROR_DESCONOCIDO exception;
   
-    ROLLBACK;
-    ELSE
-    dbms_output.put_line('Error desconocido');
-    ROLLBACK;
-    END IF;
+  BEGIN
+    BEGIN
+      EXECUTE IMMEDIATE 'DROP USER ' || usuario || ' CASCADE';
+      SYS.dbms_output.put_line('Usuario ' || usuario || ' borrado correctamente');  
+      EXCEPTION WHEN OTHERS THEN
+      ROLLBACK;
+      IF SQLCODE = -1031 THEN RAISE ERROR_PRIVS_INSUF;
+      ELSIF SQLCODE = -1918 THEN RAISE ERROR_USUARIO_NO_EXISTE;
+      ELSE RAISE ERROR_DESCONOCIDO;
+      END IF;
+    END;
+    EXCEPTION
+    when ERROR_PRIVS_INSUF then DBMS_OUTPUT.put_line('Error: no se tienen privilegios suficientes');
+    when ERROR_USUARIO_NO_EXISTE then dbms_output.put_line('Error: el usuario ' || usuario || ' no existe');
+    when ERROR_DESCONOCIDO then DBMS_OUTPUT.put_line('Error desconocido');
   END BORRAR_USUARIO;
   
   PROCEDURE BLOQUEAR_USUARIO(usuario IN VARCHAR2) IS
