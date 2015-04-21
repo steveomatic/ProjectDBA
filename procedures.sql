@@ -26,18 +26,32 @@ PACKAGE BODY GEST_USUARIO AS
     SYS.dbms_output.put_line('Usuario ' || usuario || ' bloqueado correctamente');
   END DESBLOQUEAR_USUARIO;
   
-  
+  -- Mata la sesión de usuario. Si no la tiene iniciada, nos dice que ese usuario no tiene iniciada la sesión
+  -- Hemos creado un sinónimo público para V$session llamado v_$session y hemos dado permiso de select a él a R_profesor y docencia.
+  --
   PROCEDURE MATAR_SESION (usuario IN VARCHAR2) IS
-  --EXCESIVAMENTE IMPORTANTE: Para poder compilar esto el usuario tiene que tener grant expreso por parte de sysdba
-  VAR_SID v$session.sid%TYPE;
-  VAR_SERIAL# v$session.serial#%TYPE;
+  
+  VAR_SID v_$session.sid%TYPE;
+  VAR_SERIAL# v_$session.serial#%TYPE;
+  ERROR_USUARIO_NO_EXISTE exception;
   
   BEGIN
-    select sid into VAR_SID from v$session where username = usuario;
-    select serial# into VAR_SERIAL# from v$session where username = usuario;
-    EXECUTE IMMEDIATE '''alter system kill session '||VAR_SID||','||VAR_SERIAL#||''';
-    DBMS_OUTPUT.put_line('''alter system kill session '||VAR_SID||','||VAR_SERIAL#||''');
-    
+    BEGIN
+      select sid into VAR_SID from v_$session where username = usuario;
+      select serial# into VAR_SERIAL# from v_$session where username = usuario;
+      exception when no_data_found then
+      raise ERROR_USUARIO_NO_EXISTE;
+      --DBMS_OUTPUT.put_line('alter system kill session '||''''||VAR_SID||','||VAR_SERIAL#|| '#'|| '''');
+    END;
+  BEGIN
+    EXECUTE IMMEDIATE 'alter system kill session '''||VAR_SID||','||VAR_SERIAL#||''' ';
+    exception when others then DBMS_OUTPUT.put_line('Error al matar sesión.');
+  END;  
+  
+  exception
+    when ERROR_USUARIO_NO_EXISTE then DBMS_OUTPUT.put_line('El usuario '||usuario||' no tiene la sesión iniciada.');
+    when others then DBMS_OUTPUT.put_line('Error desconocido.');
+  
   END MATAR_SESION;
 
 
