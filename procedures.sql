@@ -26,7 +26,9 @@ PACKAGE BODY GEST_USUARIO AS
     SYS.dbms_output.put_line('Usuario ' || usuario || ' bloqueado correctamente');
   END DESBLOQUEAR_USUARIO;
   
-  
+  -- Mata la sesión de usuario. Si no la tiene iniciada, nos dice que ese usuario no tiene iniciada la sesión
+  -- Hemos creado un sinónimo público para V$session llamado v_$session y hemos dado permiso de select a él a R_profesor y docencia.
+  --
   PROCEDURE MATAR_SESION (usuario IN VARCHAR2) IS
   
   VAR_SID v_$session.sid%TYPE;
