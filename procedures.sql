@@ -44,6 +44,22 @@ PROCEDURE BORRAR_USUARIO(usuario IN VARCHAR2) IS
     when ERROR_DESCONOCIDO then DBMS_OUTPUT.put_line('Error desconocido');
   END BORRAR_USUARIO;
   
+  -- Borra todos los usuarios buscando en la tabla usuarios los usuarios y llamando
+  -- a la función BORRAR_USUARIO(usuario) en un for.
+  
+  PROCEDURE BORRAR_TODOS_USUARIOS IS
+  cursor c_usuarios IS SELECT nombre FROM usuario;
+  BEGIN
+    FOR var_usuario in c_usuarios LOOP -- Puedo declarar la variable var_usuario aquí.
+      BORRAR_USUARIO(var_usuario.nombre);
+    END LOOP;
+    EXCEPTION 
+      WHEN no_data_found THEN
+        dbms_output.put_line('No hay usuarios para borrar.');
+      WHEN OTHERS THEN
+        dbms_output.put_line('Error desconocido.');
+  END BORRAR_TODOS_USUARIOS;
+  
   PROCEDURE BLOQUEAR_USUARIO(usuario IN VARCHAR2) IS
   ERROR_USUARIO_NO_EXISTE exception;
   ERROR_PRIVS_INSUF exception;
@@ -83,6 +99,48 @@ PROCEDURE BORRAR_USUARIO(usuario IN VARCHAR2) IS
     when ERROR_PRIVS_INSUF then DBMS_OUTPUT.put_line('Error, no se tienen privilegios suficientes.');
     when ERROR_DESCONOCIDO then DBMS_OUTPUT.put_line('Error desconocido.');
   END DESBLOQUEAR_USUARIO;
+  
+  -- Mata la sesión de usuario. Si no la tiene iniciada, nos dice que ese usuario no tiene iniciada la sesión
+  -- Hemos creado un sinónimo público para V$session llamado v_$session y hemos dado permiso de select a él a R_profesor y docencia.
+  --
+  PROCEDURE MATAR_SESION (usuario IN VARCHAR2) IS
+  
+  VAR_SID v_$session.sid%TYPE;
+  VAR_SERIAL# v_$session.serial#%TYPE;
+  ERROR_USUARIO_NO_EXISTE exception;
+  
+  BEGIN
+    BEGIN
+      select sid into VAR_SID from v_$session where username = usuario;
+      select serial# into VAR_SERIAL# from v_$session where username = usuario;
+      exception when no_data_found then
+      raise ERROR_USUARIO_NO_EXISTE;
+      --DBMS_OUTPUT.put_line('alter system kill session '||''''||VAR_SID||','||VAR_SERIAL#|| '#'|| '''');
+    END;
+  BEGIN
+    EXECUTE IMMEDIATE 'alter system kill session '''||VAR_SID||','||VAR_SERIAL#||''' ';
+    exception when others then DBMS_OUTPUT.put_line('Error al matar sesión.');
+  END;  
+  
+  exception
+    when ERROR_USUARIO_NO_EXISTE then DBMS_OUTPUT.put_line('El usuario '||usuario||' no tiene la sesión iniciada.');
+    when others then DBMS_OUTPUT.put_line('Error desconocido.');
+  
+  END MATAR_SESION;
+  
+  
+  PROCEDURE BLOQUEAR_TODOS_USUARIOS IS
+  cursor c_usuarios IS SELECT nombre FROM usuario; -- Cursor que almacena los nombres de los usuarios
+  BEGIN
+    FOR var_usuario IN c_usuarios LOOP -- Puedo declarar la variable var_usuario aquí.
+      BLOQUEAR_USUARIO(var_usuario.nombre); -- Bloqueamos cada usuario
+    END LOOP;
+    EXCEPTION
+      WHEN no_data_found THEN -- Si no hay usuarios (consulta vacía)
+        dbms_output.put_line('No hay usuarios para borrar.');
+      WHEN OTHERS THEN
+        dbms_output.put_line('Error desconocido.');
+  END BLOQUEAR_TODOS_USUARIOS;
 
 
 END GEST_USUARIO;

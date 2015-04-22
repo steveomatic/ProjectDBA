@@ -30,6 +30,8 @@ grant execute on system.GEST_USUARIO to R_ADMINISTRATIVO;
 
 GRANT CONNECT TO R_ALUMNO;
 GRANT CONNECT TO R_PROFESOR;
+grant select on v_$session to R_PROFESOR;
+
 
 create tablespace ts_index
   datafile 'ts_index.dat'
