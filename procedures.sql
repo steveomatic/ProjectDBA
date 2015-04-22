@@ -14,6 +14,22 @@ PACKAGE BODY GEST_USUARIO AS
     SYS.dbms_output.put_line('Usuario ' || usuario || ' borrado correctamente');
   END BORRAR_USUARIO;
   
+  -- Borra todos los usuarios buscando en la tabla usuarios los usuarios y llamando
+  -- a la función BORRAR_USUARIO(usuario) en un for.
+  
+  PROCEDURE BORRAR_TODOS_USUARIOS IS
+  cursor c_usuarios IS SELECT nombre FROM usuario;
+  BEGIN
+    FOR var_usuario in c_usuarios LOOP -- Puedo declarar la variable var_usuario aquí.
+      BORRAR_USUARIO(var_usuario.nombre);
+    END LOOP;
+    EXCEPTION 
+      WHEN no_data_found THEN
+        dbms_output.put_line('No hay usuarios para borrar.');
+      WHEN OTHERS THEN
+        dbms_output.put_line('Error desconocido.');
+  END BORRAR_TODOS_USUARIOS;
+  
   PROCEDURE BLOQUEAR_USUARIO(usuario IN VARCHAR2) IS
   BEGIN
     EXECUTE IMMEDIATE 'ALTER USER ' || usuario || ' ACCOUNT LOCK';
