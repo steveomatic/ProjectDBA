@@ -11,7 +11,6 @@ PACKAGE BODY GEST_USUARIO AS
       EXECUTE IMMEDIATE 'CREATE USER ' || usuario || ' IDENTIFIED BY ' || pass;
       DBMS_OUTPUT.PUT_LINE('Usuario ' || usuario || ' creado correctamente');
       EXCEPTION WHEN OTHERS THEN 
-      ROLLBACK;
       IF SQLCODE = -1031 then raise ERROR_PRIVS_INSUF;
       ELSIF SQLCODE = -1920 then raise ERROR_USUARIO_EXISTE;
       ELSE raise ERROR_DESCONOCIDO;
@@ -34,7 +33,6 @@ PROCEDURE BORRAR_USUARIO(usuario IN VARCHAR2) IS
       EXECUTE IMMEDIATE 'DROP USER ' || usuario || ' CASCADE';
       SYS.dbms_output.put_line('Usuario ' || usuario || ' borrado correctamente');  
       EXCEPTION WHEN OTHERS THEN
-      ROLLBACK;
       IF SQLCODE = -1031 THEN RAISE ERROR_PRIVS_INSUF;
       ELSIF SQLCODE = -1918 THEN RAISE ERROR_USUARIO_NO_EXISTE;
       ELSE RAISE ERROR_DESCONOCIDO;
