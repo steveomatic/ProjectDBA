@@ -2,16 +2,33 @@ create or replace
 PACKAGE BODY GEST_USUARIO AS 
 
   /* TODO enter package declarations (types, exceptions, methods etc) here */ 
-  PROCEDURE CREAR_USUARIO(usuario IN VARCHAR2, pass IN VARCHAR2) IS 
+   PROCEDURE CREAR_USUARIO(usuario IN VARCHAR2, pass IN VARCHAR2) IS 
   BEGIN
     EXECUTE IMMEDIATE 'CREATE USER ' || usuario || ' IDENTIFIED BY ' || pass;
     SYS.dbms_output.put_line('Usuario ' || usuario || ' creado correctamente');
+    insert into usuario(usuario_id,nombre) values (usuario_seq.NEXTVAL,usuario);
   END CREAR_USUARIO;
 
+ 
   PROCEDURE BORRAR_USUARIO(usuario IN VARCHAR2) IS
-  BEGIN
+ 
+  no_user_found EXCEPTION;
+  BEGIN 
     EXECUTE IMMEDIATE 'DROP USER ' || usuario || ' CASCADE';
     SYS.dbms_output.put_line('Usuario ' || usuario || ' borrado correctamente');
+    begin
+    delete from  usuario 
+    where
+    usuario.nombre = usuario;
+     IF SQL%NOTFOUND THEN
+    raise no_user_found;
+    end if;
+    end;
+    
+    EXCEPTION
+      WHEN no_user_found THEN dbms_output.put_line('Error, el usuario no estaba registrado');
+      WHEN others then dbms_output.put_line('Error!');
+
   END BORRAR_USUARIO;
   
   PROCEDURE BLOQUEAR_USUARIO(usuario IN VARCHAR2) IS
