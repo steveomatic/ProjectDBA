@@ -53,6 +53,20 @@ PACKAGE BODY GEST_USUARIO AS
     when others then DBMS_OUTPUT.put_line('Error desconocido.');
   
   END MATAR_SESION;
+  
+  
+  PROCEDURE BLOQUEAR_TODOS_USUARIOS IS
+  cursor c_usuarios IS SELECT nombre FROM usuario; -- Cursor que almacena los nombres de los usuarios
+  BEGIN
+    FOR var_usuario IN c_usuarios LOOP -- Puedo declarar la variable var_usuario aquí.
+      BLOQUEAR_USUARIO(var_usuario.nombre); -- Bloqueamos cada usuario
+    END LOOP;
+    EXCEPTION
+      WHEN no_data_found THEN -- Si no hay usuarios (consulta vacía)
+        dbms_output.put_line('No hay usuarios para borrar.');
+      WHEN OTHERS THEN
+        dbms_output.put_line('Error desconocido.');
+  END BLOQUEAR_TODOS_USUARIOS;
 
 
 END GEST_USUARIO;
