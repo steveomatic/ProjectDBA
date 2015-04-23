@@ -79,6 +79,19 @@ PROCEDURE BORRAR_USUARIO(usuario IN VARCHAR2) IS
     when ERROR_PRIVS_INSUF then DBMS_OUTPUT.put_line('Error, no se tienen privilegios suficientes.');
     when ERROR_DESCONOCIDO then DBMS_OUTPUT.put_line('Error desconocido.');
   END BLOQUEAR_USUARIO;
+
+  PROCEDURE BLOQUEAR_TODOS_USUARIOS IS
+  cursor c_usuarios IS SELECT nombre FROM usuario; -- Cursor que almacena los nombres de los usuarios
+  BEGIN
+    FOR var_usuario IN c_usuarios LOOP -- Puedo declarar la variable var_usuario aquí.
+      BLOQUEAR_USUARIO(var_usuario.nombre); -- Bloqueamos cada usuario
+    END LOOP;
+    EXCEPTION
+      WHEN no_data_found THEN -- Si no hay usuarios (consulta vacía)
+        dbms_output.put_line('No hay usuarios para borrar.');
+      WHEN OTHERS THEN
+        dbms_output.put_line('Error desconocido.');
+  END BLOQUEAR_TODOS_USUARIOS;
   
   PROCEDURE DESBLOQUEAR_USUARIO(usuario IN VARCHAR2) IS
   ERROR_USUARIO_NO_EXISTE exception;
@@ -99,6 +112,19 @@ PROCEDURE BORRAR_USUARIO(usuario IN VARCHAR2) IS
     when ERROR_PRIVS_INSUF then DBMS_OUTPUT.put_line('Error, no se tienen privilegios suficientes.');
     when ERROR_DESCONOCIDO then DBMS_OUTPUT.put_line('Error desconocido.');
   END DESBLOQUEAR_USUARIO;
+
+  PROCEDURE DESBLOQUEAR_TODOS_USUARIOS IS
+  cursor c_usuarios IS SELECT nombre FROM usuario; -- Cursor que almacena los nombres de los usuarios
+  BEGIN
+    FOR var_usuario IN c_usuarios LOOP -- Puedo declarar la variable var_usuario aquí.
+      DESBLOQUEAR_USUARIO(var_usuario.nombre); -- Bloqueamos cada usuario
+    END LOOP;
+    EXCEPTION
+      WHEN no_data_found THEN -- Si no hay usuarios (consulta vacía)
+        dbms_output.put_line('No hay usuarios para borrar.');
+      WHEN OTHERS THEN
+        dbms_output.put_line('Error desconocido.');
+  END DESBLOQUEAR_TODOS_USUARIOS;
   
   -- Mata la sesión de usuario. Si no la tiene iniciada, nos dice que ese usuario no tiene iniciada la sesión
   -- Hemos creado un sinónimo público para V$session llamado v_$session y hemos dado permiso de select a él a R_profesor y docencia.
@@ -128,19 +154,5 @@ PROCEDURE BORRAR_USUARIO(usuario IN VARCHAR2) IS
   
   END MATAR_SESION;
   
-  
-  PROCEDURE BLOQUEAR_TODOS_USUARIOS IS
-  cursor c_usuarios IS SELECT nombre FROM usuario; -- Cursor que almacena los nombres de los usuarios
-  BEGIN
-    FOR var_usuario IN c_usuarios LOOP -- Puedo declarar la variable var_usuario aquí.
-      BLOQUEAR_USUARIO(var_usuario.nombre); -- Bloqueamos cada usuario
-    END LOOP;
-    EXCEPTION
-      WHEN no_data_found THEN -- Si no hay usuarios (consulta vacía)
-        dbms_output.put_line('No hay usuarios para borrar.');
-      WHEN OTHERS THEN
-        dbms_output.put_line('Error desconocido.');
-  END BLOQUEAR_TODOS_USUARIOS;
-
 
 END GEST_USUARIO;
