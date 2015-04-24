@@ -146,18 +146,19 @@ PROCEDURE BORRAR_USUARIO(usuario IN VARCHAR2) IS
   --PRECONDICION: HA DE ESTAR CREADA LA SECUENCIA SEQ_CREA_USUARIOS
   --create sequence SEQ_CREA_USUARIOS start with 1 increment by 1;
   PROCEDURE CREAR_USUARIOS(asignatura IN VARCHAR2, numero IN NUMBER) IS 
-      var_counter number(6) ;
-      n pls_integer;
-      str varchar(5);
-    BEGIN
-      var_counter := 0;
-      FOR VAR_COUNTER IN 1..numero LOOP 
-      n := SEQ_CREA_USUARIOS.NEXTVAL;
-      str := DBMS_RANDOM.STRING('U', 5);
-      EXECUTE IMMEDIATE 'CREATE USER ' || ASIGNATURA || str || n || ' IDENTIFIED BY ' || ASIGNATURA || str || n;
-      --DBMS_OUTPUT.PUT_LINE('CREATE USER ' || ASIGNATURA || str || n || ' IDENTIFIED BY ' || ASIGNATURA || str || n);
-      SYS.DBMS_OUTPUT.PUT_LINE('Usuario '|| ASIGNATURA || str || n || ' creado correctamente');
-      END LOOP;
+    var_counter number(6) ;
+    n number(5);
+    str varchar(5);
+  BEGIN
+    var_counter := 0;
+    FOR VAR_COUNTER IN 1..numero LOOP 
+    n := SEQ_CREA_USUARIOS.NEXTVAL;
+    str := DBMS_RANDOM.STRING('U', 5);
+    EXECUTE IMMEDIATE 'CREATE USER ' || ASIGNATURA || str || n || ' IDENTIFIED BY ' || ASIGNATURA || str || n;
+    --DBMS_OUTPUT.PUT_LINE('CREATE USER ' || ASIGNATURA || str || n || ' IDENTIFIED BY ' || ASIGNATURA || str || n);
+    INSERT INTO USUARIO VALUES(n,ASIGNATURA || str || n);
+    SYS.DBMS_OUTPUT.PUT_LINE('Usuario '|| ASIGNATURA || str || n || ' creado correctamente');
+    END LOOP;
   END CREAR_USUARIOS;
 
 
