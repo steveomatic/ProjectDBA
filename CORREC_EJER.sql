@@ -13,12 +13,15 @@ PACKAGE BODY CORREC_EJER AS
   ERROR_TABLA_NO_EXISTE exception;
   
   
-  v_alu_query CALIF_EJERCICIO.RESPUESTA%TYPE;
+  v_alu_query CALIF_EJERCICIO.RESPUESTA%TYPE ;
   v_res_query EJERCICIO.SOLUCION%TYPE;
   
   v_respuestas_bien number;
   v_sol number;
   v_sol2 number;
+  
+  
+  v_retrib number;
   
   
   BEGIN
@@ -41,6 +44,21 @@ PACKAGE BODY CORREC_EJER AS
         END IF;
   END;
   
+  BEGIN
+  
+        select retribucion
+        into v_retrib
+        from ejercicio
+        where ejercicio_id = cor_ejercicio_id;
+    
+      EXCEPTION
+        WHEN OTHERS THEN
+          IF SQLCODE = -01789 then RAISE ERROR_COLUMNAS_DIF;
+            ELSIF SQLCODE = -01403 then RAISE ERROR_NO_DATOS;
+            ELSIF SQLCODE = -00942 then RAISE ERROR_TABLA_NO_EXISTE;
+          ELSE RAISE ERROR_DESCONOCIDO;
+        END IF;
+  END;
   
   BEGIN
   --mete la query que da la solucion correcta
@@ -99,8 +117,26 @@ PACKAGE BODY CORREC_EJER AS
   
   IF v_respuestas_bien = 2 THEN 
     DBMS_OUTPUT.PUT_LINE('Correcto'); 
+    update calif_ejercicio
+    set nota = v_retrib
+    where usuario_usuario_id = cor_usuario_id 
+    AND
+    relacion_relacion_id = cor_relacion_id
+    AND
+    asignatura_id = cor_asignatura_id
+    AND
+    ejercicio_ejercicio_id = cor_ejercicio_id;
     --añadir puntuacion positiva
   ELSE DBMS_OUTPUT.PUT_LINE('Mal');
+   update calif_ejercicio
+    set nota = 0
+    where usuario_usuario_id = cor_usuario_id 
+    AND
+    relacion_relacion_id = cor_relacion_id
+    AND
+    asignatura_id = cor_asignatura_id
+    AND
+    ejercicio_ejercicio_id = cor_ejercicio_id;
     --añadir puntuacion negativa
   END IF;
   
