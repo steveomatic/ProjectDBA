@@ -22,6 +22,42 @@ PACKAGE BODY GEST_USUARIO AS
     when ERROR_USUARIO_EXISTE then dbms_output.put_line('Error: el usuario ' || usuario || ' ya existe');
     when ERROR_DESCONOCIDO then DBMS_OUTPUT.put_line('Error desconocido');
   END CREAR_USUARIO;
+  
+  --PRECONDICION: HA DE ESTAR CREADA LA SECUENCIA SEQ_CREA_USUARIOS
+  --create sequence SEQ_CREA_USUARIOS start with 1 increment by 1;
+  --Crea numero usuarios con el formato nombreAsignatura || string aleatorio de 5 char || nº
+  --Su contraseña es el nombre de usuario.
+  PROCEDURE CREAR_USUARIOS(asignatura IN VARCHAR2, numero IN NUMBER) IS 
+  ERROR_PRIVS_INSUF exception;
+  ERROR_USUARIO_EXISTE exception;
+  ERROR_DESCONOCIDO exception;
+  var_counter number(6) ;
+  n number(5); -- para almacenar el next val de la seq crea usuarios
+  str varchar(5); -- para almacenar un string aleatorio
+  -- el usuario se llama asigantura || str || n
+  BEGIN
+    var_counter := 0;
+    FOR VAR_COUNTER IN 1..numero LOOP 
+      n := SEQ_CREA_USUARIOS.NEXTVAL;
+      str := DBMS_RANDOM.STRING('U', 5);
+      BEGIN
+        EXECUTE IMMEDIATE 'CREATE USER ' || ASIGNATURA || str || n || ' IDENTIFIED BY ' || ASIGNATURA || str || n;
+        --DBMS_OUTPUT.PUT_LINE('CREATE USER ' || ASIGNATURA || str || n || ' IDENTIFIED BY ' || ASIGNATURA || str || n);
+        INSERT INTO USUARIO VALUES(n,ASIGNATURA || str || n);
+        SYS.DBMS_OUTPUT.PUT_LINE('Usuario '|| ASIGNATURA || str || n || ' creado correctamente');
+        EXCEPTION WHEN OTHERS THEN 
+        IF SQLCODE = -1031 then raise ERROR_PRIVS_INSUF;
+        ELSIF SQLCODE = -1920 then raise ERROR_USUARIO_EXISTE;
+        ELSE raise ERROR_DESCONOCIDO;
+        END IF;
+      END;
+    END LOOP;
+    
+    EXCEPTION
+    WHEN ERROR_PRIVS_INSUF THEN DBMS_OUTPUT.put_line('Error: no se tienen privilegios suficientes');
+    WHEN ERROR_USUARIO_EXISTE THEN DBMS_OUTPUT.put_line('Error: el usuario ' || ASIGNATURA || str || n || ' ya existe');
+    WHEN ERROR_DESCONOCIDO THEN DBMS_OUTPUT.put_line('Error desconocido');
+ END CREAR_USUARIOS;
  
 PROCEDURE BORRAR_USUARIO(usuario IN VARCHAR2) IS
   ERROR_PRIVS_INSUF exception;
@@ -141,40 +177,5 @@ PROCEDURE BORRAR_USUARIO(usuario IN VARCHAR2) IS
       WHEN OTHERS THEN
         dbms_output.put_line('Error desconocido.');
   END BLOQUEAR_TODOS_USUARIOS;
-
-
-  --PRECONDICION: HA DE ESTAR CREADA LA SECUENCIA SEQ_CREA_USUARIOS
-  --create sequence SEQ_CREA_USUARIOS start with 1 increment by 1;
-  PROCEDURE CREAR_USUARIOS(asignatura IN VARCHAR2, numero IN NUMBER) IS 
-    ERROR_PRIVS_INSUF exception;
-    ERROR_USUARIO_EXISTE exception;
-    ERROR_DESCONOCIDO exception;
-    var_counter number(6) ;
-    n number(5);
-    str varchar(5);
-  BEGIN
-    var_counter := 0;
-    FOR VAR_COUNTER IN 1..numero LOOP 
-      n := SEQ_CREA_USUARIOS.NEXTVAL;
-      str := DBMS_RANDOM.STRING('U', 5);
-      BEGIN
-        EXECUTE IMMEDIATE 'CREATE USER ' || ASIGNATURA || str || n || ' IDENTIFIED BY ' || ASIGNATURA || str || n;
-        --DBMS_OUTPUT.PUT_LINE('CREATE USER ' || ASIGNATURA || str || n || ' IDENTIFIED BY ' || ASIGNATURA || str || n);
-        INSERT INTO USUARIO VALUES(n,ASIGNATURA || str || n);
-        SYS.DBMS_OUTPUT.PUT_LINE('Usuario '|| ASIGNATURA || str || n || ' creado correctamente');
-        EXCEPTION WHEN OTHERS THEN 
-        IF SQLCODE = -1031 then raise ERROR_PRIVS_INSUF;
-        ELSIF SQLCODE = -1920 then raise ERROR_USUARIO_EXISTE;
-        ELSE raise ERROR_DESCONOCIDO;
-        END IF;
-      END;
-    END LOOP;
-    
-    EXCEPTION
-    WHEN ERROR_PRIVS_INSUF THEN DBMS_OUTPUT.put_line('Error: no se tienen privilegios suficientes');
-    WHEN ERROR_USUARIO_EXISTE THEN DBMS_OUTPUT.put_line('Error: el usuario ' || ASIGNATURA || str || n || ' ya existe');
-    WHEN ERROR_DESCONOCIDO THEN DBMS_OUTPUT.put_line('Error desconocido');
- END CREAR_USUARIOS;
-
 
 END GEST_USUARIO;
