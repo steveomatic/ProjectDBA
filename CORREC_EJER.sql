@@ -114,9 +114,10 @@ PACKAGE BODY CORREC_EJER AS
   
   dbms_output.put_line(v_sol);
   dbms_output.put_line(v_sol2);
-  
+  begin
   IF v_respuestas_bien = 2 THEN 
     DBMS_OUTPUT.PUT_LINE('Correcto'); 
+   
     update calif_ejercicio
     set nota = v_retrib
     where usuario_usuario_id = cor_usuario_id 
@@ -126,6 +127,7 @@ PACKAGE BODY CORREC_EJER AS
     asignatura_id = cor_asignatura_id
     AND
     ejercicio_ejercicio_id = cor_ejercicio_id;
+    
     --añadir puntuacion positiva
   ELSE DBMS_OUTPUT.PUT_LINE('Mal');
    update calif_ejercicio
@@ -138,8 +140,21 @@ PACKAGE BODY CORREC_EJER AS
     AND
     ejercicio_ejercicio_id = cor_ejercicio_id;
     --añadir puntuacion negativa
+    
+    update ejercicio
+    set fallos = fallos+1
+    where ejercicio_id = cor_ejercicio_id;
+  
   END IF;
   
+   EXCEPTION 
+      WHEN OTHERS THEN
+        IF SQLCODE = -01789 then RAISE ERROR_COLUMNAS_DIF;
+        ELSIF SQLCODE = -01403 then RAISE ERROR_NO_DATOS;
+        ELSIF SQLCODE = -00942 then RAISE ERROR_TABLA_NO_EXISTE;
+        ELSE RAISE ERROR_DESCONOCIDO;
+        END IF;
+  end;
   
   EXCEPTION
   WHEN ERROR_NO_DATOS then DBMS_OUTPUT.PUT_LINE('No se seleccionó nada.');
