@@ -1,8 +1,8 @@
 CREATE OR REPLACE
 PACKAGE BODY CORREC_EJER AS
 
-  procedure correccion(cor_usuario_id in number, cor_ejercicio_id in number, cor_relacion_id in number, cor_asignatura_id in number) AS
-   /*
+ procedure correccion(cor_usuario_id in number,cor_relacion_id in number , cor_ejercicio_id in number, cor_asignatura_id in number)AS
+   /* 
   v_alu_query variable que guarda la query 
   enviada por el alumno y despues la ejecuta.
   */
@@ -11,6 +11,7 @@ PACKAGE BODY CORREC_EJER AS
   ERROR_COLUMNAS_DIF exception;
   ERROR_DESCONOCIDO exception;
   ERROR_TABLA_NO_EXISTE exception;
+  ERROR_ALUMNO exception;
   
   
   v_alu_query CALIF_EJERCICIO.RESPUESTA%TYPE ;
@@ -74,21 +75,19 @@ PACKAGE BODY CORREC_EJER AS
         ELSE RAISE ERROR_DESCONOCIDO;
         END IF;
   END;
-  DBMS_OUTPUT.put_line(v_alu_query);
-  DBMS_OUTPUT.put_line(v_res_query);
+ -- DBMS_OUTPUT.put_line(v_alu_query);
+  --DBMS_OUTPUT.put_line(v_res_query);
   
-  DBMS_OUTPUT.put_line('select count(*) from ('|| v_alu_query||' MINUS '||v_res_query||')');
+  --DBMS_OUTPUT.put_line('select count(*) from ('|| v_alu_query||' MINUS '||v_res_query||')');
   BEGIN
   --comprobamos el count(*) de la diferencia. Si es 0, significa que había filas idénticas.
     execute immediate 'select count(*) from ('|| v_alu_query||' MINUS '||v_res_query||')'
     into v_sol;
     EXCEPTION
       WHEN OTHERS THEN
-        IF SQLCODE = -01789 then RAISE ERROR_COLUMNAS_DIF;
-        ELSIF SQLCODE = -01403 then RAISE ERROR_NO_DATOS;
-        ELSIF SQLCODE = -00942 then RAISE ERROR_TABLA_NO_EXISTE;
-        ELSE RAISE ERROR_DESCONOCIDO;
-        END IF;
+       
+        RAISE ERROR_ALUMNO;
+       
         
   END;
   --Si efectivamente el count(*) da 0, sumamos 1 a v_respuestas_bien. Si la otra comprobación también es correcta, entonces es correcto.
@@ -96,17 +95,14 @@ PACKAGE BODY CORREC_EJER AS
     v_respuestas_bien := v_respuestas_bien + 1; 
   END IF;
   
-  DBMS_OUTPUT.put_line('select count(*) from ('|| v_res_query||' MINUS '||v_alu_query||')');
+ -- DBMS_OUTPUT.put_line('select count(*) from ('|| v_res_query||' MINUS '||v_alu_query||')');
   BEGIN
     execute immediate 'select count(*) from ('|| v_res_query||' MINUS '||v_res_query||')'
   into v_sol2;
       EXCEPTION
       WHEN OTHERS THEN
-        IF SQLCODE = -01789 then RAISE ERROR_COLUMNAS_DIF;
-        ELSIF SQLCODE = -01403 then RAISE ERROR_NO_DATOS;
-        ELSIF SQLCODE = -00942 then RAISE ERROR_TABLA_NO_EXISTE;
-        ELSE RAISE ERROR_DESCONOCIDO;
-        END IF;
+      RAISE ERROR_ALUMNO;
+      
   END;
   IF v_sol2 = 0 THEN 
     v_respuestas_bien := v_respuestas_bien + 1;
@@ -157,6 +153,7 @@ PACKAGE BODY CORREC_EJER AS
   end;
   
   EXCEPTION
+  WHEN ERROR_ALUMNO THEN DBMS_OUTPUT.PUT_LINE('Incorrecto');
   WHEN ERROR_NO_DATOS then DBMS_OUTPUT.PUT_LINE('No se seleccionó nada.');
   WHEN ERROR_COLUMNAS_DIF THEN DBMS_OUTPUT.PUT_LINE('Incorrecto, las columnas difieren.');
   WHEN ERROR_TABLA_NO_EXISTE THEN DBMS_OUTPUT.PUT_LINE('No existe la tabla');
