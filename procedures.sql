@@ -10,6 +10,14 @@ PACKAGE BODY GEST_USUARIO AS
   BEGIN
     BEGIN
       EXECUTE IMMEDIATE 'CREATE USER ' || usuario || ' IDENTIFIED BY ' || pass;
+      begin
+      insert into usuario values(usuario_seq.NEXTVAl,usuario);
+       EXCEPTION WHEN OTHERS THEN 
+      IF SQLCODE = -1031 then raise ERROR_PRIVS_INSUF;
+      ELSIF SQLCODE = -1920 then raise ERROR_USUARIO_EXISTE;
+      ELSE raise ERROR_DESCONOCIDO;
+      END IF;
+      end;
       DBMS_OUTPUT.PUT_LINE('Usuario ' || usuario || ' creado correctamente');
       EXCEPTION WHEN OTHERS THEN 
       IF SQLCODE = -1031 then raise ERROR_PRIVS_INSUF;
@@ -22,7 +30,8 @@ PACKAGE BODY GEST_USUARIO AS
     when ERROR_PRIVS_INSUF then DBMS_OUTPUT.put_line('Error: no se tienen privilegios suficientes');
     when ERROR_USUARIO_EXISTE then dbms_output.put_line('Error: el usuario ' || usuario || ' ya existe');
     when ERROR_DESCONOCIDO then DBMS_OUTPUT.put_line('Error desconocido');
-  END CREAR_USUARIO;
+  END CREAR_USUARIO; 
+  
   
   --PRECONDICION: HA DE ESTAR CREADA LA SECUENCIA SEQ_CREA_USUARIOS
   --create sequence SEQ_CREA_USUARIOS start with 1 increment by 1;
