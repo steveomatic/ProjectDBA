@@ -8,12 +8,11 @@ PACKAGE BODY PROC_ALU AS
     begin
     
       begin
-        --SELECT REPLACE('select * from dual;',';',' ') FROM DUAL;
-        
-        --este execute immediate quitará los ;
-        DBMS_OUTPUT.put_line('SELECT REPLACE( '||''''||res_respuesta||''''||','||''''||';'||''''||','||''''||' '||''''||') FROM DUAL');
-        EXECUTE IMMEDIATE 'SELECT REPLACE( '||''''||res_respuesta||''''||','||''''||';'||''''||','||''''||' '||''''||') FROM DUAL'
-        into respuesta_filtrada;
+        --Si el último carácter es un ; entonces lo elimina, si no, nada.
+        IF SUBSTR(res_respuesta, -1) = ';' THEN respuesta_filtrada := SUBSTR(res_respuesta, 0,length(res_respuesta)-1);
+        ELSE respuesta_filtrada := res_respuesta;
+        END IF;
+
         
         update DOCENCIA.calif_ejercicio
         set respuesta = respuesta_filtrada
