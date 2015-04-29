@@ -1,14 +1,15 @@
 CREATE OR REPLACE
 PACKAGE BODY ESTADISTICAS_ALU AS
 
-   procedure MAS_FALLOS AS
+   PROCEDURE MAS_FALLOS AS
    ERROR_CURSOR_ABIERTO exception;
    ejer_id docencia.ejercicio.ejercicio_id%type;
    ejercicio_enunciado docencia.ejercicio.enunciado%type;
    ejercicio_fallos docencia.ejercicio.fallos%type;
-   CURSOR ejer_cur is
+   CURSOR ejer_cur is -- Cursor que tiene los ejercicios donde más se ha fallado (todos tienen el mismo nº de fallos)
        select ejercicio_id,enunciado,fallos from docencia.ejercicio
        where fallos in (select max(fallos) from docencia.ejercicio);
+       
     BEGIN
        OPEN ejer_cur;
        LOOP
@@ -23,8 +24,8 @@ PACKAGE BODY ESTADISTICAS_ALU AS
        END IF;
        
        EXCEPTION
-       when ERROR_CURSOR_ABIERTO then dbms_output.put_line('Error, el cursor sigue abierto');
-       when others then
+       WHEN ERROR_CURSOR_ABIERTO then CLOSE ejer_cur;
+       WHEN others then
        dbms_output.put_line('Error, no se ha podido encontrar los ejercicios');
   END MAS_FALLOS;
 
