@@ -159,5 +159,56 @@ PACKAGE BODY CORREC_EJER AS
     set fallos = fallos+1
     where ejercicio_id = cor_ejercicio_id;
   END poner_cero;
+  procedure asignacion_ejer(usuario_id in number, relacion_id in number, asignatura_id in number, ejercicio_id in number)as
+   ERROR_PRIVS_INSUF exception;
+  ERROR_DESCONOCIDO exception;
+  begin
+  begin
+  insert into docencia.calif_ejercicio(nota,usuario_usuario_id,relacion_relacion_id,ejercicio_ejercicio_id,asignatura_id,respuesta) values(0,usuario_id,relacion_id,ejercicio_id,asignatura_id,null);
+  EXCEPTION WHEN OTHERS THEN 
+          IF SQLCODE = -1031 then raise ERROR_PRIVS_INSUF;
+          ELSE raise ERROR_DESCONOCIDO;
+          END IF;
+end;
+ EXCEPTION
+    WHEN ERROR_PRIVS_INSUF THEN DBMS_OUTPUT.put_line('Error: no se tienen privilegios suficientes');
+   
+    WHEN ERROR_DESCONOCIDO THEN DBMS_OUTPUT.put_line('Error desconocido');
+    end asignacion_ejer;
+    
+  procedure crear_ejer(enunciado in varchar2,tema number,solucion in varchar2,retribucion in varchar2,palabras_clave in varchar2)as
+ 
+   ERROR_PRIVS_INSUF exception;
+  ERROR_DESCONOCIDO exception;
+  begin
+  begin
+  insert into docencia.ejercicio(ejercicio_id,tema,enunciado,solucion,fallos,retribucion,palabras_clave) values(ejercicio_seq.NEXTVAL,tema,enunciado,solucion,0,retribucion,palabras_clave);
+  EXCEPTION WHEN OTHERS THEN 
+          IF SQLCODE = -1031 then raise ERROR_PRIVS_INSUF;
+          ELSE raise ERROR_DESCONOCIDO;
+          END IF;
+end;
+ EXCEPTION
+    WHEN ERROR_PRIVS_INSUF THEN DBMS_OUTPUT.put_line('Error: no se tienen privilegios suficientes');
+   
+    WHEN ERROR_DESCONOCIDO THEN DBMS_OUTPUT.put_line('Error desconocido');
+  end crear_ejer;
+  
+procedure crear_relacion(usuario_id in number, asignatura_asignatura_id in number, tema in number) as
+  ERROR_PRIVS_INSUF exception;
+  ERROR_DESCONOCIDO exception;
+begin
+begin
+insert into docencia.relacion values(relacion_seq.NEXTVAL,tema,usuario_id,asignatura_asignatura_id);
+EXCEPTION WHEN OTHERS THEN 
+        IF SQLCODE = -1031 then raise ERROR_PRIVS_INSUF;
+        ELSE raise ERROR_DESCONOCIDO;
+        END IF;
+end;
+ EXCEPTION
+    WHEN ERROR_PRIVS_INSUF THEN DBMS_OUTPUT.put_line('Error: no se tienen privilegios suficientes');
+   
+    WHEN ERROR_DESCONOCIDO THEN DBMS_OUTPUT.put_line('Error desconocido');
+end crear_relacion;
 
 END CORREC_EJER;
