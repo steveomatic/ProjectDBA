@@ -23,6 +23,7 @@ PACKAGE BODY PROC_ALU AS
         asignatura_id = res_asignatura_id
         AND
         ejercicio_ejercicio_id = res_ejercicio_id;
+        DBMS_OUTPUT.put_line('Respuesta enviada correctamente');
         EXCEPTION WHEN OTHERS THEN 
         IF SQLCODE = -1031 then raise ERROR_PRIVS_INSUF;
         ELSE raise ERROR_DESCONOCIDO;
