@@ -44,12 +44,12 @@ PROCEDURE CREAR_USUARIO(usuario IN VARCHAR2, pass IN VARCHAR2) IS
       END IF;
     END;
     
-    --BEGIN DEL GRANT R_USUARIO
+    --BEGIN DEL GRANT R_ALUMNO
     BEGIN
       EXECUTE IMMEDIATE 'GRANT R_ALUMNO TO ' || usuario;
       --DBMS_OUTPUT.PUT_LINE('GRANT R_ALUMNO TO ' || usuario);
       
-      --Excepcuones del GRANT R_USUARIO
+      --Excepciones del GRANT R_ALUMNO
       EXCEPTION WHEN OTHERS THEN 
       IF SQLCODE = -1031 then raise ERROR_PRIVS_INSUF;
       ELSIF SQLCODE = -1920 then raise ERROR_USUARIO_EXISTE;
@@ -62,7 +62,7 @@ PROCEDURE CREAR_USUARIO(usuario IN VARCHAR2, pass IN VARCHAR2) IS
     WHEN ERROR_PRIVS_INSUF THEN DBMS_OUTPUT.put_line('Error: no se tienen privilegios suficientes');
     WHEN ERROR_USUARIO_EXISTE THEN DBMS_OUTPUT.put_line('Error: el usuario ' || usuario || ' ya existe');
     WHEN ERROR_UK_VIOLADA THEN DBMS_OUTPUT.put_line('Error: usuario ' || usuario || ' creado pero el nombre está repetido y debe ser único');
-    WHEN ERROR_ROL_NO_EXISTE THEN DBMS_OUTPUT.put_line('Error: El rol R_USUARIO no existe');
+    WHEN ERROR_ROL_NO_EXISTE THEN DBMS_OUTPUT.put_line('Error: El rol R_ALUMNO no existe');
     WHEN ERROR_DESCONOCIDO THEN DBMS_OUTPUT.put_line('Error desconocido');
   END CREAR_USUARIO; 
 
@@ -123,12 +123,12 @@ PROCEDURE CREAR_USUARIOS(asignatura IN VARCHAR2, numero IN NUMBER) IS
         END IF;
       END;
       
-      --BEGIN del GRANT R_USUARIO
+      --BEGIN del GRANT R_ALUMNO
       BEGIN
         EXECUTE IMMEDIATE 'GRANT R_ALUMNO TO ' || usuario;
         --DBMS_OUTPUT.PUT_LINE('GRANT R_ALUMNO TO ' || usuario);
         
-        --Excepciones del GRANT R_USUARIO
+        --Excepciones del GRANT R_ALUMNO
         EXCEPTION WHEN OTHERS THEN 
         IF SQLCODE = -1031 then raise ERROR_PRIVS_INSUF;
         ELSIF SQLCODE = -1920 then raise ERROR_USUARIO_EXISTE;
@@ -146,7 +146,7 @@ PROCEDURE CREAR_USUARIOS(asignatura IN VARCHAR2, numero IN NUMBER) IS
     WHEN ERROR_PRIVS_INSUF THEN DBMS_OUTPUT.put_line('Error: no se tienen privilegios suficientes');
     WHEN ERROR_USUARIO_EXISTE THEN DBMS_OUTPUT.put_line('Error: el usuario ' || usuario || ' ya existe');
     WHEN ERROR_UK_VIOLADA THEN DBMS_OUTPUT.put_line('Error: usuario ' || usuario || ' creado pero el nombre está repetido y debe ser único');
-    WHEN ERROR_ROL_NO_EXISTE THEN DBMS_OUTPUT.put_line('Error: El rol R_USUARIO no existe');
+    WHEN ERROR_ROL_NO_EXISTE THEN DBMS_OUTPUT.put_line('Error: El rol R_ALUMNO no existe');
     WHEN ERROR_DESCONOCIDO THEN DBMS_OUTPUT.put_line('Error desconocido');
  END CREAR_USUARIOS;
 
