@@ -125,8 +125,8 @@ PROCEDURE CREAR_USUARIOS(asignatura IN VARCHAR2, numero IN NUMBER) IS
       
       --BEGIN del GRANT R_USUARIO
       BEGIN
-        EXECUTE IMMEDIATE 'GRANT R_USUARIO TO ' || ASIGNATURA || str || n;
-        --DBMS_OUTPUT.PUT_LINE('GRANT R_USUARIO TO ' || ASIGNATURA || str || n);
+        EXECUTE IMMEDIATE 'GRANT R_USUARIO TO ' || usuario;
+        --DBMS_OUTPUT.PUT_LINE('GRANT R_USUARIO TO ' || usuario);
         
         --Excepciones del GRANT R_USUARIO
         EXCEPTION WHEN OTHERS THEN 
