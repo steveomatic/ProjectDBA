@@ -14,7 +14,7 @@ PACKAGE BODY PROC_ALU AS
         --END IF;
         
         --Elimina todos los ; de la respuesta.
-        respuesta_filtrada := REPLACE(res_respuesta, ';')
+        respuesta_filtrada := REPLACE(res_respuesta, ';', ' ');
         
         update DOCENCIA.calif_ejercicio
         set respuesta = respuesta_filtrada
