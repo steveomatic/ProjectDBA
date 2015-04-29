@@ -2,6 +2,7 @@
 PACKAGE BODY GEST_USUARIO AS 
 
   /* TODO enter package declarations (types, exceptions, methods etc) here */ 
+
  PROCEDURE CREAR_USUARIO(usuario IN VARCHAR2, pass IN VARCHAR2) IS 
   ERROR_PRIVS_INSUF exception;
   ERROR_USUARIO_EXISTE exception;
@@ -9,6 +10,14 @@ PACKAGE BODY GEST_USUARIO AS
   BEGIN
     BEGIN
       EXECUTE IMMEDIATE 'CREATE USER ' || usuario || ' IDENTIFIED BY ' || pass;
+      begin
+      insert into usuario values(usuario_seq.NEXTVAl,usuario);
+       EXCEPTION WHEN OTHERS THEN 
+      IF SQLCODE = -1031 then raise ERROR_PRIVS_INSUF;
+      ELSIF SQLCODE = -1920 then raise ERROR_USUARIO_EXISTE;
+      ELSE raise ERROR_DESCONOCIDO;
+      END IF;
+      end;
       DBMS_OUTPUT.PUT_LINE('Usuario ' || usuario || ' creado correctamente');
       EXCEPTION WHEN OTHERS THEN 
       IF SQLCODE = -1031 then raise ERROR_PRIVS_INSUF;
@@ -21,7 +30,8 @@ PACKAGE BODY GEST_USUARIO AS
     when ERROR_PRIVS_INSUF then DBMS_OUTPUT.put_line('Error: no se tienen privilegios suficientes');
     when ERROR_USUARIO_EXISTE then dbms_output.put_line('Error: el usuario ' || usuario || ' ya existe');
     when ERROR_DESCONOCIDO then DBMS_OUTPUT.put_line('Error desconocido');
-  END CREAR_USUARIO;
+  END CREAR_USUARIO; 
+  
   
   --PRECONDICION: HA DE ESTAR CREADA LA SECUENCIA usuario_seq
   --Crea numero usuarios con el formato nombreAsignatura || string aleatorio de 5 char || nº
@@ -58,25 +68,30 @@ PACKAGE BODY GEST_USUARIO AS
     WHEN ERROR_DESCONOCIDO THEN DBMS_OUTPUT.put_line('Error desconocido');
  END CREAR_USUARIOS;
  
+
 PROCEDURE BORRAR_USUARIO(usuario IN VARCHAR2) IS
   ERROR_PRIVS_INSUF exception;
   ERROR_USUARIO_NO_EXISTE exception;
   ERROR_DESCONOCIDO exception;
-  
-  BEGIN
-    BEGIN
-      EXECUTE IMMEDIATE 'DROP USER ' || usuario || ' CASCADE';
-      SYS.dbms_output.put_line('Usuario ' || usuario || ' borrado correctamente');  
+  BEGIN 
+    EXECUTE IMMEDIATE 'DROP USER ' || usuario || ' CASCADE';
+    SYS.dbms_output.put_line('Usuario ' || usuario || ' borrado correctamente');
+    begin
+      delete from  usuario where
+        usuario.nombre = usuario;
       EXCEPTION WHEN OTHERS THEN
-      IF SQLCODE = -1031 THEN RAISE ERROR_PRIVS_INSUF;
-      ELSIF SQLCODE = -1918 THEN RAISE ERROR_USUARIO_NO_EXISTE;
-      ELSE RAISE ERROR_DESCONOCIDO;
-      END IF;
-    END;
+        IF SQLCODE = -01918 then RAISE ERROR_USUARIO_NO_EXISTE;
+        ELSIF SQLCODE = -1031 THEN RAISE ERROR_PRIVS_INSUF;
+        ELSE RAISE ERROR_DESCONOCIDO;
+        END IF;
+      end;
+    
     EXCEPTION
-    when ERROR_PRIVS_INSUF then DBMS_OUTPUT.put_line('Error: no se tienen privilegios suficientes');
-    when ERROR_USUARIO_NO_EXISTE then dbms_output.put_line('Error: el usuario ' || usuario || ' no existe');
-    when ERROR_DESCONOCIDO then DBMS_OUTPUT.put_line('Error desconocido');
+      WHEN ERROR_PRIVS_INSUF then DBMS_OUTPUT.put_line('Error: no se tienen privilegios suficientes');
+      WHEN ERROR_USUARIO_NO_EXISTE THEN dbms_output.put_line('Error, el usuario no estaba registrado');
+      WHEN ERROR_DESCONOCIDO then DBMS_OUTPUT.put_line('Error desconocido');
+      WHEN others THEN DBMS_OUTPUT.put_line('Error desconocido');
+
   END BORRAR_USUARIO;
   
   -- Borra todos los usuarios buscando en la tabla usuarios los usuarios y llamando
