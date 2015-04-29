@@ -8,11 +8,13 @@ PACKAGE BODY PROC_ALU AS
     begin
     
       begin
-        --Si el último carácter es un ; entonces lo elimina, si no, nada.
-        IF SUBSTR(res_respuesta, -1) = ';' THEN respuesta_filtrada := SUBSTR(res_respuesta, 0,length(res_respuesta)-1);
-        ELSE respuesta_filtrada := res_respuesta;
-        END IF;
-
+        --[DEPRECATED] Si el último carácter es un ; entonces lo elimina, si no, nada. 
+        --IF SUBSTR(res_respuesta, -1) = ';' THEN respuesta_filtrada := SUBSTR(res_respuesta, 0,length(res_respuesta)-1);
+        --ELSE respuesta_filtrada := res_respuesta;
+        --END IF;
+        
+        --Elimina todos los ; de la respuesta.
+        respuesta_filtrada := REPLACE(res_respuesta, ';')
         
         update DOCENCIA.calif_ejercicio
         set respuesta = respuesta_filtrada
