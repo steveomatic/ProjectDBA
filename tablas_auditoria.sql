@@ -5,4 +5,4 @@ CREATE TABLE acceso_ejercicios
   fecha_inicio DATE NOT NULL,
   fecha_entrega DATE
   );
-  ALTER TABLE acceso_ejercicios ADD CONSTRAINT USUARIO_UNIQUE UNIQUE (usuario_id, ejercicio_id));
+  ALTER TABLE acceso_ejercicios ADD CONSTRAINT USUARIO_UNIQUE UNIQUE (usuario_id, ejercicio_id);
