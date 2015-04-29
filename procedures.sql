@@ -3,22 +3,25 @@ PACKAGE BODY GEST_USUARIO AS
 
   /* TODO enter package declarations (types, exceptions, methods etc) here */ 
 
- PROCEDURE CREAR_USUARIO(usuario IN VARCHAR2, pass IN VARCHAR2) IS 
+PROCEDURE CREAR_USUARIO(usuario IN VARCHAR2, pass IN VARCHAR2) IS 
   ERROR_PRIVS_INSUF exception;
   ERROR_USUARIO_EXISTE exception;
+  ERROR_ROL_NO_EXISTE exception;
   ERROR_DESCONOCIDO exception;
   BEGIN
     BEGIN
       EXECUTE IMMEDIATE 'CREATE USER ' || usuario || ' IDENTIFIED BY ' || pass;
-      begin
-      insert into usuario values(usuario_seq.NEXTVAl,usuario);
-       EXCEPTION WHEN OTHERS THEN 
+      DBMS_OUTPUT.PUT_LINE('CREATE USER ' || usuario || ' IDENTIFIED BY ' || pass);
+      DBMS_OUTPUT.PUT_LINE('Usuario ' || usuario || ' creado correctamente');   
+      EXCEPTION WHEN OTHERS THEN 
       IF SQLCODE = -1031 then raise ERROR_PRIVS_INSUF;
       ELSIF SQLCODE = -1920 then raise ERROR_USUARIO_EXISTE;
-      ELSE raise ERROR_DESCONOCIDO;
+      ELSE RAISE ERROR_DESCONOCIDO;
       END IF;
-      end;
-      DBMS_OUTPUT.PUT_LINE('Usuario ' || usuario || ' creado correctamente');
+    END;
+    
+    BEGIN
+      INSERT INTO USUARIO VALUES(usuario_seq.NEXTVAl,usuario);
       EXCEPTION WHEN OTHERS THEN 
       IF SQLCODE = -1031 then raise ERROR_PRIVS_INSUF;
       ELSIF SQLCODE = -1920 then raise ERROR_USUARIO_EXISTE;
@@ -26,10 +29,22 @@ PACKAGE BODY GEST_USUARIO AS
       END IF;
     END;
     
-    exception
-    when ERROR_PRIVS_INSUF then DBMS_OUTPUT.put_line('Error: no se tienen privilegios suficientes');
-    when ERROR_USUARIO_EXISTE then dbms_output.put_line('Error: el usuario ' || usuario || ' ya existe');
-    when ERROR_DESCONOCIDO then DBMS_OUTPUT.put_line('Error desconocido');
+    BEGIN
+      EXECUTE IMMEDIATE 'GRANT R_USUARIO TO ' || usuario;
+      DBMS_OUTPUT.PUT_LINE('GRANT R_USUARIO TO ' || usuario);
+      EXCEPTION WHEN OTHERS THEN 
+      IF SQLCODE = -1031 then raise ERROR_PRIVS_INSUF;
+      ELSIF SQLCODE = -1920 then raise ERROR_USUARIO_EXISTE;
+      ELSIF SQLCODE = -1921 then raise ERROR_ROL_NO_EXISTE;
+      ELSE raise ERROR_DESCONOCIDO;
+      END IF;
+    END;
+    
+    EXCEPTION
+    WHEN ERROR_PRIVS_INSUF THEN DBMS_OUTPUT.put_line('Error: no se tienen privilegios suficientes');
+    WHEN ERROR_USUARIO_EXISTE THEN DBMS_OUTPUT.put_line('Error: el usuario ' || usuario || ' ya existe');
+    WHEN ERROR_ROL_NO_EXISTE THEN DBMS_OUTPUT.put_line('Error: El rol R_USUARIO no existe');
+    WHEN ERROR_DESCONOCIDO THEN DBMS_OUTPUT.put_line('Error desconocido');
   END CREAR_USUARIO; 
   
   
