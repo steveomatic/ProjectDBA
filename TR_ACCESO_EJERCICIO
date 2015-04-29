@@ -1,0 +1,17 @@
+CREATE OR REPLACE TRIGGER TR_ACCESO_EJERCICIO 
+AFTER INSERT OR UPDATE ON docencia.calif_ejercicio FOR EACH ROW
+DECLARE
+VAR_RETRIBUCION docencia.ejercicio.retribucion%TYPE;
+BEGIN
+  IF INSERTING THEN
+    --Esta situación se dará cuando el profesor asigne ejercicios
+    insert into docencia.audit_ejer values (:new.usuario_usuario_id, :new.ejercicio_ejercicio_id, sysdate, null);
+  ELSIF UPDATING THEN
+    --Sólo cuando ele ejercicio esté correcto.
+    select retribucion into VAR_RETRIBUCION from docencia.ejercicio where ejercicio_id = :new.ejercicio_ejercicio_id;
+    IF :new.nota = VAR_RETRIBUCION THEN
+      --Significa que está correcto.
+      update docencia.audit_ejer set fecha_entrega = sysdate where usuario_id = :new.usuario_usuario_id AND ejercicio_id = :new.ejercicio_ejercicio_id;
+    END IF;
+  END IF;
+END;
