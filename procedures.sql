@@ -46,14 +46,14 @@ PROCEDURE CREAR_USUARIO(usuario IN VARCHAR2, pass IN VARCHAR2) IS
     
     --BEGIN DEL GRANT R_USUARIO
     BEGIN
-      EXECUTE IMMEDIATE 'GRANT R_USUARIO TO ' || usuario;
-      --DBMS_OUTPUT.PUT_LINE('GRANT R_USUARIO TO ' || usuario);
+      EXECUTE IMMEDIATE 'GRANT R_ALUMNO TO ' || usuario;
+      --DBMS_OUTPUT.PUT_LINE('GRANT R_ALUMNO TO ' || usuario);
       
       --Excepcuones del GRANT R_USUARIO
       EXCEPTION WHEN OTHERS THEN 
       IF SQLCODE = -1031 then raise ERROR_PRIVS_INSUF;
       ELSIF SQLCODE = -1920 then raise ERROR_USUARIO_EXISTE;
-      ELSIF SQLCODE = -1921 then raise ERROR_ROL_NO_EXISTE;
+      ELSIF SQLCODE = -1919 then raise ERROR_ROL_NO_EXISTE;
       ELSE raise ERROR_DESCONOCIDO;
       END IF;
     END;
@@ -125,14 +125,14 @@ PROCEDURE CREAR_USUARIOS(asignatura IN VARCHAR2, numero IN NUMBER) IS
       
       --BEGIN del GRANT R_USUARIO
       BEGIN
-        EXECUTE IMMEDIATE 'GRANT R_USUARIO TO ' || usuario;
-        --DBMS_OUTPUT.PUT_LINE('GRANT R_USUARIO TO ' || usuario);
+        EXECUTE IMMEDIATE 'GRANT R_ALUMNO TO ' || usuario;
+        --DBMS_OUTPUT.PUT_LINE('GRANT R_ALUMNO TO ' || usuario);
         
         --Excepciones del GRANT R_USUARIO
         EXCEPTION WHEN OTHERS THEN 
         IF SQLCODE = -1031 then raise ERROR_PRIVS_INSUF;
         ELSIF SQLCODE = -1920 then raise ERROR_USUARIO_EXISTE;
-        ELSIF SQLCODE = -1921 then raise ERROR_ROL_NO_EXISTE;
+        ELSIF SQLCODE = -1919 then raise ERROR_ROL_NO_EXISTE;
         ELSE raise ERROR_DESCONOCIDO;
         END IF;
       END;
