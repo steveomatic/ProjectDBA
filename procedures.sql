@@ -23,8 +23,7 @@ PACKAGE BODY GEST_USUARIO AS
     when ERROR_DESCONOCIDO then DBMS_OUTPUT.put_line('Error desconocido');
   END CREAR_USUARIO;
   
-  --PRECONDICION: HA DE ESTAR CREADA LA SECUENCIA SEQ_CREA_USUARIOS
-  --create sequence SEQ_CREA_USUARIOS start with 1 increment by 1;
+  --PRECONDICION: HA DE ESTAR CREADA LA SECUENCIA usuario_seq
   --Crea numero usuarios con el formato nombreAsignatura || string aleatorio de 5 char || nº
   --Su contraseña es el nombre de usuario.
   PROCEDURE CREAR_USUARIOS(asignatura IN VARCHAR2, numero IN NUMBER) IS 
@@ -38,7 +37,7 @@ PACKAGE BODY GEST_USUARIO AS
   BEGIN
     var_counter := 0;
     FOR VAR_COUNTER IN 1..numero LOOP 
-      n := SEQ_CREA_USUARIOS.NEXTVAL;
+      n := usuario_seq.NEXTVAL;
       str := DBMS_RANDOM.STRING('U', 5);
       BEGIN
         EXECUTE IMMEDIATE 'CREATE USER ' || ASIGNATURA || str || n || ' IDENTIFIED BY ' || ASIGNATURA || str || n;
