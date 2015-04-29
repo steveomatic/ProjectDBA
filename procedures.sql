@@ -3,6 +3,9 @@ PACKAGE BODY GEST_USUARIO AS
 
   /* TODO enter package declarations (types, exceptions, methods etc) here */ 
 
+
+
+
 --Procedimiento para crear un usuario específico. Recibe nombre de usuario y contraseña
 --PRECONDICION: HA DE ESTAR CREADA LA SECUENCIA usuario_seq
 PROCEDURE CREAR_USUARIO(usuario IN VARCHAR2, pass IN VARCHAR2) IS 
@@ -151,49 +154,83 @@ PROCEDURE CREAR_USUARIOS(asignatura IN VARCHAR2, numero IN NUMBER) IS
  END CREAR_USUARIOS;
 
 
- 
 
+
+--Procedimiento para borrar user específico. Recibe el nombre del usuario a borrar
 PROCEDURE BORRAR_USUARIO(usuario IN VARCHAR2) IS
-  ERROR_PRIVS_INSUF exception;
-  ERROR_USUARIO_NO_EXISTE exception;
-  ERROR_DESCONOCIDO exception;
+
+  --Declaración de las excepciones propias
+  ERROR_PRIVS_INSUF exception;        --Privilegios insuficientes
+  ERROR_USUARIO_NO_EXISTE exception;  --Usuario no existe
+  ERROR_DESCONOCIDO exception;        --Otro error
+
+  --BEGIN del procedimiento
   BEGIN 
+
+    --BEGIN del DROP USER
+    BEGIN
     EXECUTE IMMEDIATE 'DROP USER ' || usuario || ' CASCADE';
-    SYS.dbms_output.put_line('Usuario ' || usuario || ' borrado correctamente');
-    begin
-      delete from  usuario where
-        usuario.nombre = usuario;
+    --DBMS_OUTPUT.PUT_LINE('DROP USER ' || usuario || ' CASCADE');
+    DBMS_OUTPUT.PUT_LINE('Usuario ' || usuario || ' borrado correctamente');
+
+    --Excepciones del create user
+    EXCEPTION WHEN OTHERS THEN
+      IF SQLCODE = -01918 then RAISE ERROR_USUARIO_NO_EXISTE;
+      ELSIF SQLCODE = -1031 THEN RAISE ERROR_PRIVS_INSUF;
+      ELSE RAISE ERROR_DESCONOCIDO;
+      END IF;
+    END;
+
+    --BEGIN del DELETE FROM
+    BEGIN
+      DELETE FROM usuario WHERE usuario.nombre = usuario;
+
+      --Excepciones del DELETE FROM
       EXCEPTION WHEN OTHERS THEN
         IF SQLCODE = -01918 then RAISE ERROR_USUARIO_NO_EXISTE;
         ELSIF SQLCODE = -1031 THEN RAISE ERROR_PRIVS_INSUF;
         ELSE RAISE ERROR_DESCONOCIDO;
         END IF;
-      end;
+    END;
     
+    --Excepciones del procedimiento
     EXCEPTION
-      WHEN ERROR_PRIVS_INSUF then DBMS_OUTPUT.put_line('Error: no se tienen privilegios suficientes');
-      WHEN ERROR_USUARIO_NO_EXISTE THEN dbms_output.put_line('Error, el usuario no estaba registrado');
-      WHEN ERROR_DESCONOCIDO then DBMS_OUTPUT.put_line('Error desconocido');
+      WHEN ERROR_PRIVS_INSUF THEN DBMS_OUTPUT.put_line('Error: no se tienen privilegios suficientes');
+      WHEN ERROR_USUARIO_NO_EXISTE THEN dbms_output.put_line('Error: el usuario no estaba registrado');
+      WHEN ERROR_DESCONOCIDO THEN DBMS_OUTPUT.put_line('Error desconocido');
       WHEN others THEN DBMS_OUTPUT.put_line('Error desconocido');
 
   END BORRAR_USUARIO;
   
-  -- Borra todos los usuarios buscando en la tabla usuarios los usuarios y llamando
-  -- a la función BORRAR_USUARIO(usuario) en un for.
-  
+
+
+
+  --Procedimiento que borra todos los usuarios buscando en la tabla usuarios los usuarios 
+  --y llamando a la función BORRAR_USUARIO(usuario) en un for.
   PROCEDURE BORRAR_TODOS_USUARIOS IS
+
+  --Se declara un cursor sobre los nombres de la tabla usuario
   cursor c_usuarios IS SELECT nombre FROM usuario;
+
+  --BEGIN del procedimiento
   BEGIN
-    FOR var_usuario in c_usuarios LOOP -- Puedo declarar la variable var_usuario aquí.
+    --Declaramos la variable var_usuario en el propio bucle sobre el cursor
+    FOR var_usuario in c_usuarios LOOP 
+      --Llamamos a la función borrar_usuario para cada nombre de la tabla usuario
       BORRAR_USUARIO(var_usuario.nombre);
     END LOOP;
+
+    --Excepciones del procedimiento
     EXCEPTION 
       WHEN no_data_found THEN
-        dbms_output.put_line('No hay usuarios para borrar.');
+        DBMS_OUTPUT.put_line('No hay usuarios para borrar.');
       WHEN OTHERS THEN
-        dbms_output.put_line('Error desconocido.');
+        DBMS_OUTPUT.put_line('Error desconocido.');
   END BORRAR_TODOS_USUARIOS;
   
+
+
+
   PROCEDURE BLOQUEAR_USUARIO(usuario IN VARCHAR2) IS
   ERROR_USUARIO_NO_EXISTE exception;
   ERROR_PRIVS_INSUF exception;
