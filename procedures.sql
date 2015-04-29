@@ -48,8 +48,8 @@ PROCEDURE CREAR_USUARIO(usuario IN VARCHAR2, pass IN VARCHAR2) IS
   END CREAR_USUARIO; 
 
 
---PRECONDICION: HA DE ESTAR CREADA LA SECUENCIA SEQ_CREA_USUARIOS
---create sequence SEQ_CREA_USUARIOS start with 1 increment by 1;
+--PRECONDICION: HA DE ESTAR CREADA LA SECUENCIA usuario_seq
+--create sequence usuario_seq start with 1 increment by 1;
 PROCEDURE CREAR_USUARIOS(asignatura IN VARCHAR2, numero IN NUMBER) IS 
     ERROR_PRIVS_INSUF exception;
     ERROR_USUARIO_EXISTE exception;
@@ -61,7 +61,7 @@ PROCEDURE CREAR_USUARIOS(asignatura IN VARCHAR2, numero IN NUMBER) IS
   BEGIN
     var_counter := 0;
     FOR VAR_COUNTER IN 1..numero LOOP 
-      n := SEQ_CREA_USUARIOS.NEXTVAL;
+      n := usuario_seq.NEXTVAL;
       str := DBMS_RANDOM.STRING('U', 5);
       
       
