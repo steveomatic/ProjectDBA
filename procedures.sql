@@ -3,16 +3,27 @@ PACKAGE BODY GEST_USUARIO AS
 
   /* TODO enter package declarations (types, exceptions, methods etc) here */ 
 
+--Procedimiento para crear un usuario específico. Recibe nombre de usuario y contraseña
+--PRECONDICION: HA DE ESTAR CREADA LA SECUENCIA usuario_seq
 PROCEDURE CREAR_USUARIO(usuario IN VARCHAR2, pass IN VARCHAR2) IS 
-  ERROR_PRIVS_INSUF exception;
-  ERROR_USUARIO_EXISTE exception;
-  ERROR_ROL_NO_EXISTE exception;
-  ERROR_DESCONOCIDO exception;
+  
+  --Declaración de las excepciones propias
+  ERROR_PRIVS_INSUF exception;    --Privilegios insuficientes
+  ERROR_USUARIO_EXISTE exception; --Usuario no existe
+  ERROR_ROL_NO_EXISTE exception;  --Rol no existe
+  ERROR_UK_VIOLADA exception;     --Clave única violada
+  ERROR_DESCONOCIDO exception;    --Otro error
+  
+  --BEGIN del procedimiento
   BEGIN
+  
+    --BEGIN del CREATE USER
     BEGIN
       EXECUTE IMMEDIATE 'CREATE USER ' || usuario || ' IDENTIFIED BY ' || pass;
       --DBMS_OUTPUT.PUT_LINE('CREATE USER ' || usuario || ' IDENTIFIED BY ' || pass);
       DBMS_OUTPUT.PUT_LINE('Usuario ' || usuario || ' creado correctamente');   
+      
+      --Excepciones del CREATE USER
       EXCEPTION WHEN OTHERS THEN 
       IF SQLCODE = -1031 then raise ERROR_PRIVS_INSUF;
       ELSIF SQLCODE = -1920 then raise ERROR_USUARIO_EXISTE;
@@ -20,18 +31,25 @@ PROCEDURE CREAR_USUARIO(usuario IN VARCHAR2, pass IN VARCHAR2) IS
       END IF;
     END;
     
+    --BEGIN del INSERT INTO USUARIO
     BEGIN
       INSERT INTO USUARIO VALUES(usuario_seq.NEXTVAl,usuario);
+      COMMIT;
+      
+      --Excepciones del INSERT INTO USUARIO
       EXCEPTION WHEN OTHERS THEN 
       IF SQLCODE = -1031 then raise ERROR_PRIVS_INSUF;
-      ELSIF SQLCODE = -1920 then raise ERROR_USUARIO_EXISTE;
+      ELSIF SQLCODE = -00001 then raise ERROR_UK_VIOLADA;
       ELSE raise ERROR_DESCONOCIDO;
       END IF;
     END;
     
+    --BEGIN DEL GRANT R_USUARIO
     BEGIN
       EXECUTE IMMEDIATE 'GRANT R_USUARIO TO ' || usuario;
       --DBMS_OUTPUT.PUT_LINE('GRANT R_USUARIO TO ' || usuario);
+      
+      --Excepcuones del GRANT R_USUARIO
       EXCEPTION WHEN OTHERS THEN 
       IF SQLCODE = -1031 then raise ERROR_PRIVS_INSUF;
       ELSIF SQLCODE = -1920 then raise ERROR_USUARIO_EXISTE;
@@ -43,32 +61,48 @@ PROCEDURE CREAR_USUARIO(usuario IN VARCHAR2, pass IN VARCHAR2) IS
     EXCEPTION
     WHEN ERROR_PRIVS_INSUF THEN DBMS_OUTPUT.put_line('Error: no se tienen privilegios suficientes');
     WHEN ERROR_USUARIO_EXISTE THEN DBMS_OUTPUT.put_line('Error: el usuario ' || usuario || ' ya existe');
+    WHEN ERROR_UK_VIOLADA THEN DBMS_OUTPUT.put_line('Error: usuario ' || usuario || ' creado pero el nombre está repetido y debe ser único');
     WHEN ERROR_ROL_NO_EXISTE THEN DBMS_OUTPUT.put_line('Error: El rol R_USUARIO no existe');
     WHEN ERROR_DESCONOCIDO THEN DBMS_OUTPUT.put_line('Error desconocido');
   END CREAR_USUARIO; 
 
 
+
+
+--Procedimiento para crear varios usuarios. Recibe las siglas de la asignatura y el número de usuarios a crear
 --PRECONDICION: HA DE ESTAR CREADA LA SECUENCIA usuario_seq
---create sequence usuario_seq start with 1 increment by 1;
 PROCEDURE CREAR_USUARIOS(asignatura IN VARCHAR2, numero IN NUMBER) IS 
-    ERROR_PRIVS_INSUF exception;
-    ERROR_USUARIO_EXISTE exception;
-    ERROR_ROL_NO_EXISTE exception;
-    ERROR_DESCONOCIDO exception;
-    var_counter number(6) ;
-    n number(5);
-    str varchar(5);
-  BEGIN
-    var_counter := 0;
-    FOR VAR_COUNTER IN 1..numero LOOP 
-      n := usuario_seq.NEXTVAL;
-      str := DBMS_RANDOM.STRING('U', 5);
       
+    --Declaración de las excepciones propias
+    ERROR_PRIVS_INSUF exception;    --Privilegios insuficientes
+    ERROR_USUARIO_EXISTE exception; --Usuario no existe
+    ERROR_ROL_NO_EXISTE exception;  --Rol no existe
+    ERROR_UK_VIOLADA exception;     --Clave única violada
+    ERROR_DESCONOCIDO exception;    --Otro error
+    
+    --Declaración de variables
+    var_counter number(6) ;   --Contador para el bucle
+    n number(5);              --Número de secuencia para el id y el nombre de cada usuario
+    str varchar(5);           --String de 5 caracteres que van a ser aleatorios para cada usuario
+    usuario varchar(30);      --Nombre de cada usuario
+    
+    --BEGIN del procedimiento
+    BEGIN
+      --Iniciamos el bucle que va de 0 a N (número de usuarios que nos piden)
+      var_counter := 0;
+      FOR VAR_COUNTER IN 1..numero LOOP
       
+      n := usuario_seq.NEXTVAL;          --Extraemos el siguiente valor de la secuencia
+      str := DBMS_RANDOM.STRING('U', 5); --Generamos 5 caracteres aleatorios
+      usuario := ASIGNATURA || str || n; --Concatenamos para conseguir el username
+      
+      --BEGIN del CREATE USER
       BEGIN
-        EXECUTE IMMEDIATE 'CREATE USER ' || ASIGNATURA || str || n || ' IDENTIFIED BY ' || ASIGNATURA || str || n;
-        --DBMS_OUTPUT.PUT_LINE('CREATE USER ' || ASIGNATURA || str || n || ' IDENTIFIED BY ' || ASIGNATURA || str || n);
-        DBMS_OUTPUT.PUT_LINE('Usuario ' || ASIGNATURA || str || n || ' creado correctamente');   
+        EXECUTE IMMEDIATE 'CREATE USER ' || usuario || ' IDENTIFIED BY ' || usuario;
+        --DBMS_OUTPUT.PUT_LINE('CREATE USER ' || usuario || ' IDENTIFIED BY ' || usuario);
+        DBMS_OUTPUT.PUT_LINE('Usuario ' || usuario || ' creado correctamente');   
+        
+        --Excepciones del create user
         EXCEPTION WHEN OTHERS THEN 
         IF SQLCODE = -1031 then raise ERROR_PRIVS_INSUF;
         ELSIF SQLCODE = -1920 then raise ERROR_USUARIO_EXISTE;
@@ -76,21 +110,25 @@ PROCEDURE CREAR_USUARIOS(asignatura IN VARCHAR2, numero IN NUMBER) IS
         END IF;
       END;
       
-      
+      --BEGIN del INSERT INTO
       BEGIN
-        INSERT INTO USUARIO VALUES(n,ASIGNATURA || str || n);
+        INSERT INTO USUARIO VALUES(n,usuario);
+        COMMIT;
+        
+        --Excepciones del INSERT INTO
         EXCEPTION WHEN OTHERS THEN 
         IF SQLCODE = -1031 then raise ERROR_PRIVS_INSUF;
-        ELSIF SQLCODE = -1920 then raise ERROR_USUARIO_EXISTE;
+        ELSIF SQLCODE = -00001 then raise ERROR_UK_VIOLADA;
         ELSE raise ERROR_DESCONOCIDO;
         END IF;
       END;
-      END LOOP;
       
-      
+      --BEGIN del GRANT R_USUARIO
       BEGIN
         EXECUTE IMMEDIATE 'GRANT R_USUARIO TO ' || ASIGNATURA || str || n;
         --DBMS_OUTPUT.PUT_LINE('GRANT R_USUARIO TO ' || ASIGNATURA || str || n);
+        
+        --Excepciones del GRANT R_USUARIO
         EXCEPTION WHEN OTHERS THEN 
         IF SQLCODE = -1031 then raise ERROR_PRIVS_INSUF;
         ELSIF SQLCODE = -1920 then raise ERROR_USUARIO_EXISTE;
@@ -98,13 +136,21 @@ PROCEDURE CREAR_USUARIOS(asignatura IN VARCHAR2, numero IN NUMBER) IS
         ELSE raise ERROR_DESCONOCIDO;
         END IF;
       END;
+      
+      
+      END LOOP;
+      --Acaba el bucle de creación, inserción y concesión de privilegios a N usuarios
     
-    
+    --Tratamiento de excepciones del procedimiento
     EXCEPTION
     WHEN ERROR_PRIVS_INSUF THEN DBMS_OUTPUT.put_line('Error: no se tienen privilegios suficientes');
-    WHEN ERROR_USUARIO_EXISTE THEN DBMS_OUTPUT.put_line('Error: el usuario ' || ASIGNATURA || str || n || ' ya existe');
+    WHEN ERROR_USUARIO_EXISTE THEN DBMS_OUTPUT.put_line('Error: el usuario ' || usuario || ' ya existe');
+    WHEN ERROR_UK_VIOLADA THEN DBMS_OUTPUT.put_line('Error: usuario ' || usuario || ' creado pero el nombre está repetido y debe ser único');
+    WHEN ERROR_ROL_NO_EXISTE THEN DBMS_OUTPUT.put_line('Error: El rol R_USUARIO no existe');
     WHEN ERROR_DESCONOCIDO THEN DBMS_OUTPUT.put_line('Error desconocido');
  END CREAR_USUARIOS;
+
+
  
 
 PROCEDURE BORRAR_USUARIO(usuario IN VARCHAR2) IS
