@@ -1,6 +1,7 @@
 create or replace 
 PACKAGE BODY ESTADISTICAS_ALU AS
 
+  -- Busca los ejercicios con el mayor número de fallos y los muestra. Solo da aquellos cuyo número de fallos es max(fallos)  
    PROCEDURE MAS_FALLOS AS
    ejer_id docencia.ejercicio.ejercicio_id%type;
    ejercicio_enunciado docencia.ejercicio.enunciado%type;
