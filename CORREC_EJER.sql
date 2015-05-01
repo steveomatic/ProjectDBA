@@ -194,22 +194,25 @@ end;
     WHEN ERROR_DESCONOCIDO THEN DBMS_OUTPUT.put_line('Error desconocido');
   end crear_ejer;
   
-procedure crear_relacion(usuario_id in number, asignatura_asignatura_id in number, tema in number) as
+  procedure crear_relacion(usuario_id in number, asignatura_asignatura_id in number, tema in number) as
   ERROR_PRIVS_INSUF exception;
   ERROR_DESCONOCIDO exception;
-begin
-begin
-insert into docencia.relacion values(relacion_seq.NEXTVAL,tema,usuario_id,asignatura_asignatura_id);
-EXCEPTION WHEN OTHERS THEN 
+  ERROR_PK_VIOLADA exception;
+
+  begin
+    begin
+      insert into docencia.relacion values(relacion_seq.NEXTVAL,tema,usuario_id,asignatura_asignatura_id);
+      EXCEPTION WHEN OTHERS THEN 
         IF SQLCODE = -1031 then raise ERROR_PRIVS_INSUF;
+        ELSIF SQLCODE = -1 THEN RAISE ERROR_PK_VIOLADA;
         ELSE raise ERROR_DESCONOCIDO;
         END IF;
-end;
-DBMS_OUTPUT.put_line('Relación creada satisfactoriamente.');
-EXCEPTION
-    WHEN ERROR_PRIVS_INSUF THEN DBMS_OUTPUT.put_line('Error: no se tienen privilegios suficientes');
-   
-    WHEN ERROR_DESCONOCIDO THEN DBMS_OUTPUT.put_line('Error desconocido'); -- Si hubiera un error de PK violada, este sería el error mostrado.
-end crear_relacion;
+    end;
+    DBMS_OUTPUT.put_line('Relación creada satisfactoriamente.');
+  EXCEPTION
+    WHEN ERROR_PRIVS_INSUF THEN DBMS_OUTPUT.put_line('Error: no se tienen privilegios suficientes'); 
+    WHEN ERROR_PK_VIOLADA THEN DBMS_OUTPUT.put_line('Error: PK violada. Vuelva a intentarlo, la próxima vez se usará una PK diferente.'); 
+    WHEN ERROR_DESCONOCIDO THEN DBMS_OUTPUT.put_line('Error desconocido');
+  end crear_relacion;
 
 END CORREC_EJER;
