@@ -101,6 +101,8 @@ PROCEDURE CREAR_USUARIOS(asignatura IN VARCHAR2, numero IN NUMBER) IS
       
     --Declaración de las excepciones propias
     ERROR_PRIVS_INSUF exception;    --Privilegios insuficientes
+    ERROR_PRIVS_INSERT_INSUF exception; -- Privilegios insuficientes para hacer el insert
+    ERROR_PRIVS_GRANT_INSUF exception; -- Privilegios insuficientes para hacer el grant
     ERROR_USUARIO_EXISTE exception; --Usuario no existe
     ERROR_ROL_NO_EXISTE exception;  --Rol no existe
     ERROR_UK_VIOLADA exception;     --Clave única violada
@@ -143,7 +145,7 @@ PROCEDURE CREAR_USUARIOS(asignatura IN VARCHAR2, numero IN NUMBER) IS
         
         --Excepciones del INSERT INTO
         EXCEPTION WHEN OTHERS THEN 
-        IF SQLCODE = -1031 then raise ERROR_PRIVS_INSUF;
+        IF SQLCODE = -1031 then raise ERROR_PRIVS_INSERT_INSUF;
         ELSIF SQLCODE = -00001 then raise ERROR_UK_VIOLADA;
         ELSE raise ERROR_DESCONOCIDO;
         END IF;
@@ -156,8 +158,7 @@ PROCEDURE CREAR_USUARIOS(asignatura IN VARCHAR2, numero IN NUMBER) IS
         
         --Excepciones del GRANT R_ALUMNO
         EXCEPTION WHEN OTHERS THEN 
-        IF SQLCODE = -1031 then raise ERROR_PRIVS_INSUF;
-        ELSIF SQLCODE = -1920 then raise ERROR_USUARIO_EXISTE;
+        IF SQLCODE = -1031 then raise ERROR_PRIVS_GRANT_INSUF;
         ELSIF SQLCODE = -1919 then raise ERROR_ROL_NO_EXISTE;
         ELSE raise ERROR_DESCONOCIDO;
         END IF;
@@ -168,12 +169,29 @@ PROCEDURE CREAR_USUARIOS(asignatura IN VARCHAR2, numero IN NUMBER) IS
       --Acaba el bucle de creación, inserción y concesión de privilegios a N usuarios
     
     --Tratamiento de excepciones del procedimiento
-    EXCEPTION
-    WHEN ERROR_PRIVS_INSUF THEN DBMS_OUTPUT.put_line('Error: no se tienen privilegios suficientes');
-    WHEN ERROR_USUARIO_EXISTE THEN DBMS_OUTPUT.put_line('Error: el usuario ' || usuario || ' ya existe');
-    WHEN ERROR_UK_VIOLADA THEN DBMS_OUTPUT.put_line('Error: usuario ' || usuario || ' creado pero el nombre está repetido y debe ser único');
-    WHEN ERROR_ROL_NO_EXISTE THEN DBMS_OUTPUT.put_line('Error: El rol R_ALUMNO no existe');
-    WHEN ERROR_DESCONOCIDO THEN DBMS_OUTPUT.put_line('Error desconocido');
+   EXCEPTION
+    WHEN ERROR_PRIVS_INSUF THEN 
+      DBMS_OUTPUT.put_line('Error: no se tienen privilegios suficientes para crear el usuario.');
+    WHEN ERROR_USUARIO_EXISTE THEN 
+      DBMS_OUTPUT.put_line('Error: el usuario ' || usuario || ' ya existe');
+    WHEN ERROR_UK_VIOLADA THEN 
+      DBMS_OUTPUT.put_line('Error: El usuario ' || usuario || ' ya existe en la base de datos o el id que se iba a utilizar para ese usuario que aún no existe ya estaba en uso. En este último caso, inténtelo de nuevo.');
+      EXECUTE IMMEDIATE 'DROP USER ' || usuario; 
+    WHEN ERROR_PRIVS_INSERT_INSUF THEN
+      DBMS_OUTPUT.put_line('Error: No se tienen privilegios suficientes para insertar el usuario en la base de datos.');
+      EXECUTE IMMEDIATE 'DROP USER ' || usuario; 
+    WHEN ERROR_PRIVS_GRANT_INSUF THEN
+      DBMS_OUTPUT.put_line('Error: No se tienen privilegios suficientes para dar el rol R_ALIMNO.');
+      EXECUTE IMMEDIATE 'DROP USER ' || usuario; 
+      DELETE FROM usuario WHERE nombre = usuario;
+    WHEN ERROR_ROL_NO_EXISTE THEN 
+      DBMS_OUTPUT.put_line('Error: El rol R_ALUMNO no existe');
+      EXECUTE IMMEDIATE 'DROP USER ' || usuario; 
+      DELETE FROM usuario WHERE nombre = usuario;
+    WHEN ERROR_DESCONOCIDO THEN 
+      DBMS_OUTPUT.put_line('Error desconocido');
+      EXECUTE IMMEDIATE 'DROP USER ' || usuario; 
+      DELETE FROM usuario WHERE nombre = usuario;
  END CREAR_USUARIOS;
 
 
