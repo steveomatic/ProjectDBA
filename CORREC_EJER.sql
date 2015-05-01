@@ -142,6 +142,11 @@ PACKAGE BODY CORREC_EJER AS
   WHEN ERROR_DESCONOCIDO THEN DBMS_OUTPUT.PUT_LINE('Error desconocido');poner_cero(cor_usuario_id, cor_usuario_id, cor_ejercicio_id, cor_asignatura_id);
   
   END correccion;
+
+  ---------------------------------------------------------------------------------------------------------------------------
+  ---------------------------------------------------------------------------------------------------------------------------
+  ---------------------------------------------------------------------------------------------------------------------------
+  
   
  procedure poner_cero(cor_usuario_id in number,cor_relacion_id in number , cor_ejercicio_id in number, cor_asignatura_id in number) AS   
   BEGIN
@@ -160,6 +165,10 @@ PACKAGE BODY CORREC_EJER AS
     where ejercicio_id = cor_ejercicio_id;
   END poner_cero;
 
+  ---------------------------------------------------------------------------------------------------------------------------
+  ---------------------------------------------------------------------------------------------------------------------------
+  ---------------------------------------------------------------------------------------------------------------------------
+  
 
   procedure asignacion_ejer(usuario_id in number, relacion_id in number, asignatura_id in number, ejercicio_id in number)as
    ERROR_PRIVS_INSUF exception;
@@ -177,7 +186,11 @@ end;
    
     WHEN ERROR_DESCONOCIDO THEN DBMS_OUTPUT.put_line('Error desconocido');
     end asignacion_ejer;
-    
+  
+  ---------------------------------------------------------------------------------------------------------------------------
+  ---------------------------------------------------------------------------------------------------------------------------
+  ---------------------------------------------------------------------------------------------------------------------------
+      
   procedure crear_ejer(enunciado in varchar2,tema number,solucion in varchar2,retribucion in varchar2,palabras_clave in varchar2)as
  
   ERROR_PRIVS_INSUF exception;
@@ -198,7 +211,9 @@ end;
     WHEN ERROR_PK_VIOLADA THEN DBMS_OUTPUT.put_line('Error: PK violada. Vuelva a intentarlo, la próxima vez se usará una PK diferente.'); 
     WHEN ERROR_DESCONOCIDO THEN DBMS_OUTPUT.put_line('Error desconocido');
   end crear_ejer;
-  
+  ---------------------------------------------------------------------------------------------------------------------------
+  ---------------------------------------------------------------------------------------------------------------------------
+  ---------------------------------------------------------------------------------------------------------------------------
   procedure crear_relacion(usuario_id in number, asignatura_asignatura_id in number, tema in number) as
   ERROR_PRIVS_INSUF exception;
   ERROR_DESCONOCIDO exception;
