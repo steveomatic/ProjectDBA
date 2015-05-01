@@ -173,18 +173,20 @@ PACKAGE BODY CORREC_EJER AS
   procedure asignacion_ejer(usuario_id in number, relacion_id in number, asignatura_id in number, ejercicio_id in number)as
   ERROR_PRIVS_INSUF exception;
   ERROR_DESCONOCIDO exception;
+  ERROR_PK_VIOLADA exception;
     begin
       begin
         insert into docencia.calif_ejercicio(nota,usuario_usuario_id,relacion_relacion_id,ejercicio_ejercicio_id,asignatura_id,respuesta) values(0,usuario_id,relacion_id,ejercicio_id,asignatura_id,null);
         DBMS_OUTPUT.put_line('Asignación satisfactoria');
       EXCEPTION WHEN OTHERS THEN 
         IF SQLCODE = -1031 then raise ERROR_PRIVS_INSUF;
+        ELSIF SQLCODE = -1 THEN RAISE ERROR_PK_VIOLADA;
         ELSE raise ERROR_DESCONOCIDO;
         END IF;
     end;
   EXCEPTION
     WHEN ERROR_PRIVS_INSUF THEN DBMS_OUTPUT.put_line('Error: no se tienen privilegios suficientes');
-   
+    WHEN ERROR_PK_VIOLADA THEN DBMS_OUTPUT.put_line('Error: Esa asignación ya está hecha. (PK Violada)'); 
     WHEN ERROR_DESCONOCIDO THEN DBMS_OUTPUT.put_line('Error desconocido');
   end asignacion_ejer;
   
