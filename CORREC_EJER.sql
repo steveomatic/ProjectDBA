@@ -159,6 +159,8 @@ PACKAGE BODY CORREC_EJER AS
     set fallos = fallos+1
     where ejercicio_id = cor_ejercicio_id;
   END poner_cero;
+
+
   procedure asignacion_ejer(usuario_id in number, relacion_id in number, asignatura_id in number, ejercicio_id in number)as
    ERROR_PRIVS_INSUF exception;
   ERROR_DESCONOCIDO exception;
@@ -178,19 +180,22 @@ end;
     
   procedure crear_ejer(enunciado in varchar2,tema number,solucion in varchar2,retribucion in varchar2,palabras_clave in varchar2)as
  
-   ERROR_PRIVS_INSUF exception;
+  ERROR_PRIVS_INSUF exception;
   ERROR_DESCONOCIDO exception;
+  ERROR_PK_VIOLADA exception;
   begin
-  begin
-  insert into docencia.ejercicio(ejercicio_id,tema,enunciado,solucion,fallos,retribucion,palabras_clave) values(ejercicio_seq.NEXTVAL,tema,enunciado,solucion,0,retribucion,palabras_clave);
-  EXCEPTION WHEN OTHERS THEN 
-          IF SQLCODE = -1031 then raise ERROR_PRIVS_INSUF;
-          ELSE raise ERROR_DESCONOCIDO;
-          END IF;
-end;
- EXCEPTION
-    WHEN ERROR_PRIVS_INSUF THEN DBMS_OUTPUT.put_line('Error: no se tienen privilegios suficientes');
-   
+    begin
+      insert into docencia.ejercicio(ejercicio_id,tema,enunciado,solucion,fallos,retribucion,palabras_clave) values(ejercicio_seq.NEXTVAL,tema,enunciado,solucion,0,retribucion,palabras_clave);
+      EXCEPTION WHEN OTHERS THEN 
+      IF SQLCODE = -1031 THEN RAISE ERROR_PRIVS_INSUF;
+      ELSIF SQLCODE = -1 THEN RAISE ERROR_PK_VIOLADA;
+      ELSE raise ERROR_DESCONOCIDO;
+      END IF;
+    end;
+    DBMS_OUTPUT.put_line('Ejercicio creado satisfactoriamente.');
+  EXCEPTION
+    WHEN ERROR_PRIVS_INSUF THEN DBMS_OUTPUT.put_line('Error: no se tienen privilegios suficientes.'); 
+    WHEN ERROR_PK_VIOLADA THEN DBMS_OUTPUT.put_line('Error: PK violada. Vuelva a intentarlo, la próxima vez se usará una PK diferente.'); 
     WHEN ERROR_DESCONOCIDO THEN DBMS_OUTPUT.put_line('Error desconocido');
   end crear_ejer;
   
