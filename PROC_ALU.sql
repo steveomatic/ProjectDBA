@@ -124,9 +124,8 @@ procedure correccion_alu(cor_usuario_id in number,cor_relacion_id in number , co
     AND
     ejercicio_ejercicio_id = cor_ejercicio_id;
     
-    --añadir puntuacion positiva
-  ELSE DBMS_OUTPUT.PUT_LINE('');
-   update calif_ejercicio
+  ELSE     --añadir puntuacion 0
+    update calif_ejercicio
     set nota = 0
     where usuario_usuario_id = cor_usuario_id 
     AND
@@ -135,7 +134,7 @@ procedure correccion_alu(cor_usuario_id in number,cor_relacion_id in number , co
     asignatura_id = cor_asignatura_id
     AND
     ejercicio_ejercicio_id = cor_ejercicio_id;
-    --añadir puntuacion negativa
+    --aumentar el número de fallos del ejercicio
     
     update ejercicio
     set fallos = fallos+1
@@ -152,12 +151,89 @@ procedure correccion_alu(cor_usuario_id in number,cor_relacion_id in number , co
         END IF;
   end;
   
-  EXCEPTION
-  WHEN ERROR_ALUMNO THEN DBMS_OUTPUT.PUT_LINE('');
-  WHEN ERROR_NO_DATOS then DBMS_OUTPUT.PUT_LINE('No se seleccionó nada.');
-  WHEN ERROR_COLUMNAS_DIF THEN DBMS_OUTPUT.PUT_LINE('');
-  WHEN ERROR_TABLA_NO_EXISTE THEN DBMS_OUTPUT.PUT_LINE('No existe la tabla');
-  WHEN ERROR_DESCONOCIDO THEN DBMS_OUTPUT.PUT_LINE('Error desconocido');
+  EXCEPTION -- He copiado el código de poner 0 en vez de hacer un función para que así el alumno no tenga permisos de ejecutar esa función.
+  WHEN ERROR_ALUMNO THEN 
+    DBMS_OUTPUT.PUT_LINE('');
+    update calif_ejercicio
+    set nota = 0
+    where usuario_usuario_id = cor_usuario_id 
+    AND
+    relacion_relacion_id = cor_relacion_id
+    AND
+    asignatura_id = cor_asignatura_id
+    AND
+    ejercicio_ejercicio_id = cor_ejercicio_id;
+    --aumentar el número de fallos del ejercicio
+    
+    update ejercicio
+    set fallos = fallos+1
+    where ejercicio_id = cor_ejercicio_id;
+  WHEN ERROR_NO_DATOS then 
+    DBMS_OUTPUT.PUT_LINE('No se seleccionó nada.');
+    update calif_ejercicio
+    set nota = 0
+    where usuario_usuario_id = cor_usuario_id 
+    AND
+    relacion_relacion_id = cor_relacion_id
+    AND
+    asignatura_id = cor_asignatura_id
+    AND
+    ejercicio_ejercicio_id = cor_ejercicio_id;
+    --aumentar el número de fallos del ejercicio
+    
+    update ejercicio
+    set fallos = fallos+1
+    where ejercicio_id = cor_ejercicio_id;
+  WHEN ERROR_COLUMNAS_DIF THEN 
+    DBMS_OUTPUT.PUT_LINE('');
+    update calif_ejercicio
+    set nota = 0
+    where usuario_usuario_id = cor_usuario_id 
+    AND
+    relacion_relacion_id = cor_relacion_id
+    AND
+    asignatura_id = cor_asignatura_id
+    AND
+    ejercicio_ejercicio_id = cor_ejercicio_id;
+    --aumentar el número de fallos del ejercicio
+    
+    update ejercicio
+    set fallos = fallos+1
+    where ejercicio_id = cor_ejercicio_id;
+  
+  WHEN ERROR_TABLA_NO_EXISTE THEN 
+    DBMS_OUTPUT.PUT_LINE('No existe la tabla');
+    update calif_ejercicio
+    set nota = 0
+    where usuario_usuario_id = cor_usuario_id 
+    AND
+    relacion_relacion_id = cor_relacion_id
+    AND
+    asignatura_id = cor_asignatura_id
+    AND
+    ejercicio_ejercicio_id = cor_ejercicio_id;
+    --aumentar el número de fallos del ejercicio
+    
+    update ejercicio
+    set fallos = fallos+1
+    where ejercicio_id = cor_ejercicio_id;
+    
+  WHEN ERROR_DESCONOCIDO THEN 
+    DBMS_OUTPUT.PUT_LINE('Error desconocido');
+    update calif_ejercicio
+    set nota = 0
+    where usuario_usuario_id = cor_usuario_id 
+    AND
+    relacion_relacion_id = cor_relacion_id
+    AND
+    asignatura_id = cor_asignatura_id
+    AND
+    ejercicio_ejercicio_id = cor_ejercicio_id;
+    --aumentar el número de fallos del ejercicio
+    
+    update ejercicio
+    set fallos = fallos+1
+    where ejercicio_id = cor_ejercicio_id;
   
   END correccion_alu;
   
@@ -191,8 +267,8 @@ procedure correccion_alu(cor_usuario_id in number,cor_relacion_id in number , co
         AND
         ejercicio_ejercicio_id = res_ejercicio_id;
         DBMS_OUTPUT.put_line('Respuesta enviada correctamente');
-         correccion_alu(res_usuario_id,res_relacion_id,res_ejercicio_id, res_asignatura_id);
-          DBMS_OUTPUT.put_line('Respuesta autoevaluada');
+        correccion_alu(res_usuario_id,res_relacion_id,res_ejercicio_id, res_asignatura_id);
+        DBMS_OUTPUT.put_line('Respuesta autoevaluada');
         EXCEPTION WHEN OTHERS THEN 
         IF SQLCODE = -1031 then raise ERROR_PRIVS_INSUF;
         ELSE raise ERROR_DESCONOCIDO;
