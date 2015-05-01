@@ -205,10 +205,11 @@ EXCEPTION WHEN OTHERS THEN
         ELSE raise ERROR_DESCONOCIDO;
         END IF;
 end;
- EXCEPTION
+DBMS_OUTPUT.put_line('Relación creada satisfactoriamente.');
+EXCEPTION
     WHEN ERROR_PRIVS_INSUF THEN DBMS_OUTPUT.put_line('Error: no se tienen privilegios suficientes');
    
-    WHEN ERROR_DESCONOCIDO THEN DBMS_OUTPUT.put_line('Error desconocido');
+    WHEN ERROR_DESCONOCIDO THEN DBMS_OUTPUT.put_line('Error desconocido'); -- Si hubiera un error de PK violada, este sería el error mostrado.
 end crear_relacion;
 
 END CORREC_EJER;
