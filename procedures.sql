@@ -203,10 +203,11 @@ PROCEDURE CREAR_USUARIOS(asignatura IN VARCHAR2, numero IN NUMBER) IS
 PROCEDURE BORRAR_USUARIO(usuario IN VARCHAR2) IS
 
   --Declaración de las excepciones propias
-  ERROR_PRIVS_INSUF exception;        --Privilegios insuficientes
+  ERROR_PRIVS_INSUF exception;        --Privilegios insuficientes al hacer delete from usuario
   ERROR_USUARIO_NO_EXISTE exception;  --Usuario no existe
   ERROR_DESCONOCIDO exception;        --Otro error
-
+  ERROR_PRIVS_DROP_INSUF exception;   --Privilegios insuficientes para hacer el drop
+  ERROR_DESCONOCIDO_DROP exception;   --Error desconocido al hacer el drop
   --BEGIN del procedimiento
   BEGIN 
 
@@ -214,13 +215,12 @@ PROCEDURE BORRAR_USUARIO(usuario IN VARCHAR2) IS
     BEGIN
     EXECUTE IMMEDIATE 'DROP USER ' || usuario || ' CASCADE';
     --DBMS_OUTPUT.PUT_LINE('DROP USER ' || usuario || ' CASCADE');
-    DBMS_OUTPUT.PUT_LINE('Usuario ' || usuario || ' borrado correctamente');
 
     --Excepciones del create user
     EXCEPTION WHEN OTHERS THEN
       IF SQLCODE = -01918 then RAISE ERROR_USUARIO_NO_EXISTE;
-      ELSIF SQLCODE = -1031 THEN RAISE ERROR_PRIVS_INSUF;
-      ELSE RAISE ERROR_DESCONOCIDO;
+      ELSIF SQLCODE = -1031 THEN RAISE ERROR_PRIVS_DROP_INSUF;
+      ELSE RAISE ERROR_DESCONOCIDO_DROP;
       END IF;
     END;
 
@@ -230,18 +230,23 @@ PROCEDURE BORRAR_USUARIO(usuario IN VARCHAR2) IS
 
       --Excepciones del DELETE FROM
       EXCEPTION WHEN OTHERS THEN
-        IF SQLCODE = -01918 then RAISE ERROR_USUARIO_NO_EXISTE;
-        ELSIF SQLCODE = -1031 THEN RAISE ERROR_PRIVS_INSUF;
+        IF SQLCODE = -1031 THEN RAISE ERROR_PRIVS_INSUF;
         ELSE RAISE ERROR_DESCONOCIDO;
         END IF;
     END;
-    
+    DBMS_OUTPUT.PUT_LINE('Usuario ' || usuario || ' borrado correctamente');
     --Excepciones del procedimiento
     EXCEPTION
-      WHEN ERROR_PRIVS_INSUF THEN DBMS_OUTPUT.put_line('Error: no se tienen privilegios suficientes');
-      WHEN ERROR_USUARIO_NO_EXISTE THEN dbms_output.put_line('Error: el usuario no estaba registrado');
-      WHEN ERROR_DESCONOCIDO THEN DBMS_OUTPUT.put_line('Error desconocido');
-      WHEN others THEN DBMS_OUTPUT.put_line('Error desconocido');
+      WHEN ERROR_PRIVS_DROP_INSUF THEN
+        DBMS_OUTPUT.put_line('Error: no se tienen privilegios suficientes para borrar al usuario.');
+      WHEN ERROR_USUARIO_NO_EXISTE THEN 
+        dbms_output.put_line('Error: el usuario no estaba registrado');
+      WHEN ERROR_PRIVS_INSUF THEN 
+        DBMS_OUTPUT.put_line('Error: Se ha borrado al usuario pero no se ha podido eliminar de la tabla usuarios. Consulte al administrador urgéntemente.');
+      WHEN ERROR_DESCONOCIDO THEN
+        DBMS_OUTPUT.put_line('Error desconocido');
+      WHEN others THEN
+        DBMS_OUTPUT.put_line('Error desconocido');
 
   END BORRAR_USUARIO;
   
