@@ -309,7 +309,15 @@ procedure ver_preguntas(ver_usuario_id in number, ver_relacion_id in number, ver
           EXIT WHEN ejer_cur%notfound;
           dbms_output.put_line('ID= '||ejer_id || ' ' || ejercicio_enunciado || ' #Puntos=' ||ejercicio_retribucion);
           begin
-          insert into audit_ejer values(ver_usuario_id,ejer_id,sysdate,null,null);
+          
+          insert into audit_ejer(usuario_id,ejercicio_id,fecha_inicio)
+          select ver_usuario_id,ejer_id,sysdate from dual
+          where not exists (
+          select 1 from audit_ejer
+          where usuario_id = ver_usuario_id
+          and
+          ejer_id = ejercicio_id
+          );
            EXCEPTION WHEN OTHERS THEN 
           IF SQLCODE = -1031 then raise ERROR_PRIVS_INSUF;
           ELSE raise ERROR_DESCONOCIDO;
