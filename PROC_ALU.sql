@@ -280,7 +280,77 @@ procedure correccion_alu(cor_usuario_id in number,cor_relacion_id in number , co
    
     when ERROR_DESCONOCIDO then DBMS_OUTPUT.put_line('Error desconocido');
     end responder;
+    
+    
+    --para cada relacion, visualiza cada pregunta
+procedure ver_preguntas(ver_usuario_id in number, ver_relacion_id in number, ver_asignatura_id in number) as
 
+   ejer_id  ejercicio.ejercicio_id%type;
+   ejercicio_enunciado ejercicio.enunciado%type;
+   ejercicio_retribucion ejercicio.retribucion%type;
+   CURSOR ejer_cur is
+       select ejercicio_id,enunciado,retribucion from ejercicio
+       where ejercicio_id in 
+       (
+       select ejercicio_id from calif_ejercicio 
+       where 
+       usuario_usuario_id = ver_usuario_id
+       and
+       relacion_relacion_id = ver_relacion_id
+       and asignatura_id = ver_asignatura_id
+       );
+        ERROR_PRIVS_INSUF exception;
+    ERROR_DESCONOCIDO exception;
+                
+    BEGIN
+       OPEN ejer_cur;
+       LOOP
+          FETCH ejer_cur into ejer_id, ejercicio_enunciado,ejercicio_retribucion;
+          EXIT WHEN ejer_cur%notfound;
+          dbms_output.put_line('ID= '||ejer_id || ' ' || ejercicio_enunciado || ' #Puntos=' ||ejercicio_retribucion);
+          begin
+          
+          insert into audit_ejer(usuario_id,ejercicio_id,fecha_inicio)
+          select ver_usuario_id,ejer_id,sysdate from dual
+          where not exists (
+          select 1 from audit_ejer
+          where usuario_id = ver_usuario_id
+          and
+          ejer_id = ejercicio_id
+          );
+           EXCEPTION WHEN OTHERS THEN 
+          IF SQLCODE = -1031 then raise ERROR_PRIVS_INSUF;
+          ELSE raise ERROR_DESCONOCIDO;
+          END IF;
+          
+          end;
+          
+          
+       END LOOP;
+       CLOSE ejer_cur;
+       
+       
+       
+       EXCEPTION
+        when ERROR_PRIVS_INSUF then 
+        DBMS_OUTPUT.put_line('Error: no se tienen privilegios suficientes');
+        IF ejer_cur%ISOPEN
+        THEN
+           CLOSE ejer_cur;
+        END IF;
+      when ERROR_DESCONOCIDO then
+      DBMS_OUTPUT.put_line('Error desconocido');
+        IF ejer_cur%ISOPEN
+        THEN
+           CLOSE ejer_cur;
+        END IF;
+       WHEN others then
+       dbms_output.put_line('Error, no se ha podido encontrar los ejercicios');
+         IF ejer_cur%ISOPEN
+        THEN
+           CLOSE ejer_cur;
+        END IF;
+end ver_preguntas;
 
     
     
