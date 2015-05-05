@@ -1,9 +1,11 @@
-﻿create or replace 
+CREATE OR REPLACE
 PACKAGE BODY GEST_USUARIO AS 
 
   /* TODO enter package declarations (types, exceptions, methods etc) here */ 
 
 
+---------------------------------------------------------
+---------------------------------------------------------
 
 
 --Procedimiento para crear un usuario específico. Recibe nombre de usuario y contraseña
@@ -12,6 +14,8 @@ PROCEDURE CREAR_USUARIO(usuario IN VARCHAR2, pass IN VARCHAR2) IS
   
   --Declaración de las excepciones propias
   ERROR_PRIVS_INSUF exception;    --Privilegios insuficientes
+  ERROR_PRIVS_INSERT_INSUF exception; -- Privilegios insuficientes para hacer el insert
+  ERROR_PRIVS_GRANT_INSUF exception; -- Privilegios insuficientes para hacer el grant
   ERROR_USUARIO_EXISTE exception; --Usuario no existe
   ERROR_ROL_NO_EXISTE exception;  --Rol no existe
   ERROR_UK_VIOLADA exception;     --Clave única violada
@@ -24,7 +28,6 @@ PROCEDURE CREAR_USUARIO(usuario IN VARCHAR2, pass IN VARCHAR2) IS
     BEGIN
       EXECUTE IMMEDIATE 'CREATE USER ' || usuario || ' IDENTIFIED BY ' || pass;
       --DBMS_OUTPUT.PUT_LINE('CREATE USER ' || usuario || ' IDENTIFIED BY ' || pass);
-      DBMS_OUTPUT.PUT_LINE('Usuario ' || usuario || ' creado correctamente');   
       
       --Excepciones del CREATE USER
       EXCEPTION WHEN OTHERS THEN 
@@ -41,7 +44,7 @@ PROCEDURE CREAR_USUARIO(usuario IN VARCHAR2, pass IN VARCHAR2) IS
       
       --Excepciones del INSERT INTO USUARIO
       EXCEPTION WHEN OTHERS THEN 
-      IF SQLCODE = -1031 then raise ERROR_PRIVS_INSUF;
+      IF SQLCODE = -1031 then raise ERROR_PRIVS_INSERT_INSUF;
       ELSIF SQLCODE = -00001 then raise ERROR_UK_VIOLADA;
       ELSE raise ERROR_DESCONOCIDO;
       END IF;
@@ -54,22 +57,42 @@ PROCEDURE CREAR_USUARIO(usuario IN VARCHAR2, pass IN VARCHAR2) IS
       
       --Excepciones del GRANT R_ALUMNO
       EXCEPTION WHEN OTHERS THEN 
-      IF SQLCODE = -1031 then raise ERROR_PRIVS_INSUF;
+      IF SQLCODE = -1031 then raise ERROR_PRIVS_GRANT_INSUF;
       ELSIF SQLCODE = -1920 then raise ERROR_USUARIO_EXISTE;
       ELSIF SQLCODE = -1919 then raise ERROR_ROL_NO_EXISTE;
       ELSE raise ERROR_DESCONOCIDO;
       END IF;
     END;
     
+    DBMS_OUTPUT.PUT_LINE('Usuario ' || usuario || ' creado correctamente');   
     EXCEPTION
-    WHEN ERROR_PRIVS_INSUF THEN DBMS_OUTPUT.put_line('Error: no se tienen privilegios suficientes');
-    WHEN ERROR_USUARIO_EXISTE THEN DBMS_OUTPUT.put_line('Error: el usuario ' || usuario || ' ya existe');
-    WHEN ERROR_UK_VIOLADA THEN DBMS_OUTPUT.put_line('Error: usuario ' || usuario || ' creado pero el nombre está repetido y debe ser único');
-    WHEN ERROR_ROL_NO_EXISTE THEN DBMS_OUTPUT.put_line('Error: El rol R_ALUMNO no existe');
-    WHEN ERROR_DESCONOCIDO THEN DBMS_OUTPUT.put_line('Error desconocido');
+    WHEN ERROR_PRIVS_INSUF THEN 
+      DBMS_OUTPUT.put_line('Error: no se tienen privilegios suficientes para crear el usuario.');
+    WHEN ERROR_USUARIO_EXISTE THEN 
+      DBMS_OUTPUT.put_line('Error: el usuario ' || usuario || ' ya existe');
+    WHEN ERROR_UK_VIOLADA THEN 
+      DBMS_OUTPUT.put_line('Error: El usuario ' || usuario || ' ya existe en la base de datos o el id que se iba a utilizar para ese usuario que aún no existe ya estaba en uso. En este último caso, inténtelo de nuevo.');
+      EXECUTE IMMEDIATE 'DROP USER ' || usuario; 
+    WHEN ERROR_PRIVS_INSERT_INSUF THEN
+      DBMS_OUTPUT.put_line('Error: No se tienen privilegios suficientes para insertar el usuario en la base de datos.');
+      EXECUTE IMMEDIATE 'DROP USER ' || usuario; 
+    WHEN ERROR_PRIVS_GRANT_INSUF THEN
+      DBMS_OUTPUT.put_line('Error: No se tienen privilegios suficientes para dar el rol R_ALIMNO.');
+      EXECUTE IMMEDIATE 'DROP USER ' || usuario; 
+      DELETE FROM usuario WHERE nombre = usuario;
+    WHEN ERROR_ROL_NO_EXISTE THEN 
+      DBMS_OUTPUT.put_line('Error: El rol R_ALUMNO no existe');
+      EXECUTE IMMEDIATE 'DROP USER ' || usuario; 
+      DELETE FROM usuario WHERE nombre = usuario;
+    WHEN ERROR_DESCONOCIDO THEN 
+      DBMS_OUTPUT.put_line('Error desconocido');
+      EXECUTE IMMEDIATE 'DROP USER ' || usuario; 
+      DELETE FROM usuario WHERE nombre = usuario;
   END CREAR_USUARIO; 
 
 
+---------------------------------------------------------
+---------------------------------------------------------
 
 
 --Procedimiento para crear varios usuarios. Recibe las siglas de la asignatura y el número de usuarios a crear
@@ -78,6 +101,8 @@ PROCEDURE CREAR_USUARIOS(asignatura IN VARCHAR2, numero IN NUMBER) IS
       
     --Declaración de las excepciones propias
     ERROR_PRIVS_INSUF exception;    --Privilegios insuficientes
+    ERROR_PRIVS_INSERT_INSUF exception; -- Privilegios insuficientes para hacer el insert
+    ERROR_PRIVS_GRANT_INSUF exception; -- Privilegios insuficientes para hacer el grant
     ERROR_USUARIO_EXISTE exception; --Usuario no existe
     ERROR_ROL_NO_EXISTE exception;  --Rol no existe
     ERROR_UK_VIOLADA exception;     --Clave única violada
@@ -120,7 +145,7 @@ PROCEDURE CREAR_USUARIOS(asignatura IN VARCHAR2, numero IN NUMBER) IS
         
         --Excepciones del INSERT INTO
         EXCEPTION WHEN OTHERS THEN 
-        IF SQLCODE = -1031 then raise ERROR_PRIVS_INSUF;
+        IF SQLCODE = -1031 then raise ERROR_PRIVS_INSERT_INSUF;
         ELSIF SQLCODE = -00001 then raise ERROR_UK_VIOLADA;
         ELSE raise ERROR_DESCONOCIDO;
         END IF;
@@ -133,8 +158,7 @@ PROCEDURE CREAR_USUARIOS(asignatura IN VARCHAR2, numero IN NUMBER) IS
         
         --Excepciones del GRANT R_ALUMNO
         EXCEPTION WHEN OTHERS THEN 
-        IF SQLCODE = -1031 then raise ERROR_PRIVS_INSUF;
-        ELSIF SQLCODE = -1920 then raise ERROR_USUARIO_EXISTE;
+        IF SQLCODE = -1031 then raise ERROR_PRIVS_GRANT_INSUF;
         ELSIF SQLCODE = -1919 then raise ERROR_ROL_NO_EXISTE;
         ELSE raise ERROR_DESCONOCIDO;
         END IF;
@@ -145,25 +169,45 @@ PROCEDURE CREAR_USUARIOS(asignatura IN VARCHAR2, numero IN NUMBER) IS
       --Acaba el bucle de creación, inserción y concesión de privilegios a N usuarios
     
     --Tratamiento de excepciones del procedimiento
-    EXCEPTION
-    WHEN ERROR_PRIVS_INSUF THEN DBMS_OUTPUT.put_line('Error: no se tienen privilegios suficientes');
-    WHEN ERROR_USUARIO_EXISTE THEN DBMS_OUTPUT.put_line('Error: el usuario ' || usuario || ' ya existe');
-    WHEN ERROR_UK_VIOLADA THEN DBMS_OUTPUT.put_line('Error: usuario ' || usuario || ' creado pero el nombre está repetido y debe ser único');
-    WHEN ERROR_ROL_NO_EXISTE THEN DBMS_OUTPUT.put_line('Error: El rol R_ALUMNO no existe');
-    WHEN ERROR_DESCONOCIDO THEN DBMS_OUTPUT.put_line('Error desconocido');
+   EXCEPTION
+    WHEN ERROR_PRIVS_INSUF THEN 
+      DBMS_OUTPUT.put_line('Error: no se tienen privilegios suficientes para crear el usuario.');
+    WHEN ERROR_USUARIO_EXISTE THEN 
+      DBMS_OUTPUT.put_line('Error: el usuario ' || usuario || ' ya existe');
+    WHEN ERROR_UK_VIOLADA THEN 
+      DBMS_OUTPUT.put_line('Error: El usuario ' || usuario || ' ya existe en la base de datos o el id que se iba a utilizar para ese usuario que aún no existe ya estaba en uso. En este último caso, inténtelo de nuevo.');
+      EXECUTE IMMEDIATE 'DROP USER ' || usuario; 
+    WHEN ERROR_PRIVS_INSERT_INSUF THEN
+      DBMS_OUTPUT.put_line('Error: No se tienen privilegios suficientes para insertar el usuario en la base de datos.');
+      EXECUTE IMMEDIATE 'DROP USER ' || usuario; 
+    WHEN ERROR_PRIVS_GRANT_INSUF THEN
+      DBMS_OUTPUT.put_line('Error: No se tienen privilegios suficientes para dar el rol R_ALIMNO.');
+      EXECUTE IMMEDIATE 'DROP USER ' || usuario; 
+      DELETE FROM usuario WHERE nombre = usuario;
+    WHEN ERROR_ROL_NO_EXISTE THEN 
+      DBMS_OUTPUT.put_line('Error: El rol R_ALUMNO no existe');
+      EXECUTE IMMEDIATE 'DROP USER ' || usuario; 
+      DELETE FROM usuario WHERE nombre = usuario;
+    WHEN ERROR_DESCONOCIDO THEN 
+      DBMS_OUTPUT.put_line('Error desconocido');
+      EXECUTE IMMEDIATE 'DROP USER ' || usuario; 
+      DELETE FROM usuario WHERE nombre = usuario;
  END CREAR_USUARIOS;
 
 
+---------------------------------------------------------
+---------------------------------------------------------
 
 
 --Procedimiento para borrar user específico. Recibe el nombre del usuario a borrar
 PROCEDURE BORRAR_USUARIO(usuario IN VARCHAR2) IS
 
   --Declaración de las excepciones propias
-  ERROR_PRIVS_INSUF exception;        --Privilegios insuficientes
+  ERROR_PRIVS_INSUF exception;        --Privilegios insuficientes al hacer delete from usuario
   ERROR_USUARIO_NO_EXISTE exception;  --Usuario no existe
   ERROR_DESCONOCIDO exception;        --Otro error
-
+  ERROR_PRIVS_DROP_INSUF exception;   --Privilegios insuficientes para hacer el drop
+  ERROR_DESCONOCIDO_DROP exception;   --Error desconocido al hacer el drop
   --BEGIN del procedimiento
   BEGIN 
 
@@ -171,13 +215,12 @@ PROCEDURE BORRAR_USUARIO(usuario IN VARCHAR2) IS
     BEGIN
     EXECUTE IMMEDIATE 'DROP USER ' || usuario || ' CASCADE';
     --DBMS_OUTPUT.PUT_LINE('DROP USER ' || usuario || ' CASCADE');
-    DBMS_OUTPUT.PUT_LINE('Usuario ' || usuario || ' borrado correctamente');
 
     --Excepciones del create user
     EXCEPTION WHEN OTHERS THEN
       IF SQLCODE = -01918 then RAISE ERROR_USUARIO_NO_EXISTE;
-      ELSIF SQLCODE = -1031 THEN RAISE ERROR_PRIVS_INSUF;
-      ELSE RAISE ERROR_DESCONOCIDO;
+      ELSIF SQLCODE = -1031 THEN RAISE ERROR_PRIVS_DROP_INSUF;
+      ELSE RAISE ERROR_DESCONOCIDO_DROP;
       END IF;
     END;
 
@@ -187,22 +230,29 @@ PROCEDURE BORRAR_USUARIO(usuario IN VARCHAR2) IS
 
       --Excepciones del DELETE FROM
       EXCEPTION WHEN OTHERS THEN
-        IF SQLCODE = -01918 then RAISE ERROR_USUARIO_NO_EXISTE;
-        ELSIF SQLCODE = -1031 THEN RAISE ERROR_PRIVS_INSUF;
+        IF SQLCODE = -1031 THEN RAISE ERROR_PRIVS_INSUF;
         ELSE RAISE ERROR_DESCONOCIDO;
         END IF;
     END;
-    
+    DBMS_OUTPUT.PUT_LINE('Usuario ' || usuario || ' borrado correctamente');
     --Excepciones del procedimiento
     EXCEPTION
-      WHEN ERROR_PRIVS_INSUF THEN DBMS_OUTPUT.put_line('Error: no se tienen privilegios suficientes');
-      WHEN ERROR_USUARIO_NO_EXISTE THEN dbms_output.put_line('Error: el usuario no estaba registrado');
-      WHEN ERROR_DESCONOCIDO THEN DBMS_OUTPUT.put_line('Error desconocido');
-      WHEN others THEN DBMS_OUTPUT.put_line('Error desconocido');
+      WHEN ERROR_PRIVS_DROP_INSUF THEN
+        DBMS_OUTPUT.put_line('Error: no se tienen privilegios suficientes para borrar al usuario.');
+      WHEN ERROR_USUARIO_NO_EXISTE THEN 
+        dbms_output.put_line('Error: el usuario no estaba registrado');
+      WHEN ERROR_PRIVS_INSUF THEN 
+        DBMS_OUTPUT.put_line('Error: Se ha borrado al usuario pero no se ha podido eliminar de la tabla usuarios. Consulte al administrador urgéntemente.');
+      WHEN ERROR_DESCONOCIDO THEN
+        DBMS_OUTPUT.put_line('Error desconocido');
+      WHEN others THEN
+        DBMS_OUTPUT.put_line('Error desconocido');
 
   END BORRAR_USUARIO;
   
 
+---------------------------------------------------------
+---------------------------------------------------------
 
 
   --Procedimiento que borra todos los usuarios buscando en la tabla usuarios los usuarios 
@@ -222,109 +272,192 @@ PROCEDURE BORRAR_USUARIO(usuario IN VARCHAR2) IS
 
     --Excepciones del procedimiento
     EXCEPTION 
-      WHEN no_data_found THEN
+      WHEN NO_DATA_FOUND THEN
         DBMS_OUTPUT.put_line('No hay usuarios para borrar.');
       WHEN OTHERS THEN
         DBMS_OUTPUT.put_line('Error desconocido.');
   END BORRAR_TODOS_USUARIOS;
   
 
+---------------------------------------------------------
+---------------------------------------------------------
 
 
+  --Procedimiento para bloquear un usuario específico. Recibe el nombre de dicho user.
   PROCEDURE BLOQUEAR_USUARIO(usuario IN VARCHAR2) IS
-  ERROR_USUARIO_NO_EXISTE exception;
-  ERROR_PRIVS_INSUF exception;
-  ERROR_DESCONOCIDO exception;
+
+  --Declaración de las excepciones propias
+  ERROR_USUARIO_NO_EXISTE exception;    --No existe el usuario que se quiere bloquear
+  ERROR_PRIVS_INSUF exception;          --No hay privilegios suficientes
+  ERROR_DESCONOCIDO exception;          --Otro error
+
+  --BEGIN del procedimiento
   BEGIN
+
+    --BEGIN del ALTER USER ACCOUNT LOCK
     BEGIN
       EXECUTE IMMEDIATE 'ALTER USER ' || usuario || ' ACCOUNT LOCK';
-      SYS.dbms_output.put_line('Usuario ' || usuario || ' bloqueado correctamente');
+      --DBMS_OUTPUT.put_line('ALTER USER ' || usuario || ' ACCOUNT LOCK');
+      DBMS_OUTPUT.put_line('Usuario ' || usuario || ' bloqueado correctamente');
+
+      --Excepciones del ALTER USER
       EXCEPTION WHEN OTHERS THEN
       IF SQLCODE = -01918 then RAISE ERROR_USUARIO_NO_EXISTE;
       ELSIF SQLCODE = -1031 THEN RAISE ERROR_PRIVS_INSUF;
       ELSE RAISE ERROR_DESCONOCIDO;
       END IF;
     END;
+
+    --Tratamiento de excepciones del procedimiento
     EXCEPTION
-    when ERROR_USUARIO_NO_EXISTE then DBMS_OUTPUT.put_line('Error, el usuario '|| usuario ||' no existe.');
-    when ERROR_PRIVS_INSUF then DBMS_OUTPUT.put_line('Error, no se tienen privilegios suficientes.');
-    when ERROR_DESCONOCIDO then DBMS_OUTPUT.put_line('Error desconocido.');
+    WHEN ERROR_USUARIO_NO_EXISTE then DBMS_OUTPUT.put_line('Error, el usuario '|| usuario ||' no existe.');
+    WHEN ERROR_PRIVS_INSUF then DBMS_OUTPUT.put_line('Error: no se tienen privilegios suficientes.');
+    WHEN ERROR_DESCONOCIDO then DBMS_OUTPUT.put_line('Error desconocido.');
   END BLOQUEAR_USUARIO;
 
+
+---------------------------------------------------------
+---------------------------------------------------------
+
+
+  --Procedimiento que bloquea a todos los usuarios usando la función BLOQUEAR_USUARIO
   PROCEDURE BLOQUEAR_TODOS_USUARIOS IS
-  cursor c_usuarios IS SELECT nombre FROM usuario; -- Cursor que almacena los nombres de los usuarios
+
+  --Cursor que almacena los nombres de los usuarios
+  cursor c_usuarios IS SELECT nombre FROM usuario; 
+
+  --BEGIN del procedimiento
   BEGIN
-    FOR var_usuario IN c_usuarios LOOP -- Puedo declarar la variable var_usuario aquí.
-      BLOQUEAR_USUARIO(var_usuario.nombre); -- Bloqueamos cada usuario
+
+    --Declaramos la variable var_usuario en el propio bucle sobre el cursor
+    FOR var_usuario IN c_usuarios LOOP
+      BLOQUEAR_USUARIO(var_usuario.nombre); --Bloqueamos a cada usuario
     END LOOP;
+
+    --Excepciones del procedimiento
     EXCEPTION
-      WHEN no_data_found THEN -- Si no hay usuarios (consulta vacía)
-        dbms_output.put_line('No hay usuarios para borrar.');
+      WHEN NO_DATA_FOUND THEN --Si no hay usuarios (consulta vacía)
+        DBMS_OUTPUT.put_line('No hay usuarios para borrar.');
       WHEN OTHERS THEN
-        dbms_output.put_line('Error desconocido.');
+        DBMS_OUTPUT.put_line('Error desconocido.');
   END BLOQUEAR_TODOS_USUARIOS;
   
+
+---------------------------------------------------------
+---------------------------------------------------------
+
+
+  --Procedimiento que desbloquea a un usuario específico que se le indica
   PROCEDURE DESBLOQUEAR_USUARIO(usuario IN VARCHAR2) IS
-  ERROR_USUARIO_NO_EXISTE exception;
-  ERROR_PRIVS_INSUF exception;
-  ERROR_DESCONOCIDO exception;
+
+  --Declaramos las excepciones propias
+  ERROR_USUARIO_NO_EXISTE exception;  --El usuario que se quiere desbloquear no existe
+  ERROR_PRIVS_INSUF exception;        --No hay privilegios suficientes
+  ERROR_DESCONOCIDO exception;        --Otro error
+
+  --BEGIN del procedimiento
   BEGIN
+
+    --Begin del ALTER USER ACCOUNT UNLOCK
     BEGIN
       EXECUTE IMMEDIATE 'ALTER USER ' || usuario || ' ACCOUNT UNLOCK';
-      SYS.dbms_output.put_line('Usuario ' || usuario || ' desbloqueado correctamente');
+      DBMS_OUTPUT.put_line('Usuario ' || usuario || ' desbloqueado correctamente');
+
+      --Excepciones del ALTER USE
       EXCEPTION WHEN OTHERS THEN
       IF SQLCODE = -01918 then RAISE ERROR_USUARIO_NO_EXISTE;
       ELSIF SQLCODE = -1031 THEN RAISE ERROR_PRIVS_INSUF;
       ELSE RAISE ERROR_DESCONOCIDO;
       END IF;
     END;
+
+    --Tratamiento de excepciones del procedimiento
     EXCEPTION
     when ERROR_USUARIO_NO_EXISTE then DBMS_OUTPUT.put_line('Error, el usuario '|| usuario ||' no existe.');
-    when ERROR_PRIVS_INSUF then DBMS_OUTPUT.put_line('Error, no se tienen privilegios suficientes.');
+    when ERROR_PRIVS_INSUF then DBMS_OUTPUT.put_line('Error: no se tienen privilegios suficientes.');
     when ERROR_DESCONOCIDO then DBMS_OUTPUT.put_line('Error desconocido.');
   END DESBLOQUEAR_USUARIO;
 
+
+---------------------------------------------------------
+---------------------------------------------------------
+
+
+  --Procedimiento para desbloquear todos los usuarios que llama a DESBLOQUEAR_USUARIO
   PROCEDURE DESBLOQUEAR_TODOS_USUARIOS IS
-  cursor c_usuarios IS SELECT nombre FROM usuario; -- Cursor que almacena los nombres de los usuarios
+
+  --Cursor que almacena los nombres de los usuarios
+  cursor c_usuarios IS SELECT nombre FROM usuario;
+
+  --BEGIN del procedimiento
   BEGIN
-    FOR var_usuario IN c_usuarios LOOP -- Puedo declarar la variable var_usuario aquí.
-      DESBLOQUEAR_USUARIO(var_usuario.nombre); -- Bloqueamos cada usuario
+    --Declaramos la variable var_usuario en el propio bucle sobre el cursor
+    FOR var_usuario IN c_usuarios LOOP
+      DESBLOQUEAR_USUARIO(var_usuario.nombre); --Desbloqueamos a cada usuario
     END LOOP;
+
+    --Excepciones del procedimiento
     EXCEPTION
-      WHEN no_data_found THEN -- Si no hay usuarios (consulta vacía)
-        dbms_output.put_line('No hay usuarios para borrar.');
+      WHEN NO_DATA_FOUND THEN -- Si no hay usuarios (consulta vacía)
+        DBMS_OUTPUT.put_line('No hay usuarios para borrar.');
       WHEN OTHERS THEN
-        dbms_output.put_line('Error desconocido.');
+        DBMS_OUTPUT.put_line('Error desconocido.');
   END DESBLOQUEAR_TODOS_USUARIOS;
   
-  -- Mata la sesión de usuario. Si no la tiene iniciada, nos dice que ese usuario no tiene iniciada la sesión
-  -- Hemos creado un sinónimo público para V$session llamado v_$session y hemos dado permiso de select a él a R_profesor y docencia.
-  --
+
+---------------------------------------------------------
+---------------------------------------------------------
+
+
+  --Mata la sesión de usuario. Si no la tiene iniciada, nos dice que ese usuario no tiene iniciada la sesión
+  --Hemos creado un sinónimo público para V$session llamado v_$session y hemos dado permiso de select a él a R_profesor y docencia.
   PROCEDURE MATAR_SESION (usuario IN VARCHAR2) IS
   
+  --Declaramos una variable que va a almacenar el SID de la sesión del usuario
   VAR_SID v_$session.sid%TYPE;
+  --Declaramos una variable que va a almacenar el SERIAL de la sesión del usuario
   VAR_SERIAL# v_$session.serial#%TYPE;
-  ERROR_USUARIO_NO_EXISTE exception;
+
+  ERROR_USUARIO_NO_EXISTE exception;  --El usuario cuya sesión quieren que matemos no existe
+  ERROR_DESCONOCIDO exception;        --Otro error
   
+  --BEGIN del procedimiento
   BEGIN
+
+    --BEGIN del SELECT
     BEGIN
-      select sid into VAR_SID from v_$session where username = usuario;
-      select serial# into VAR_SERIAL# from v_$session where username = usuario;
-      exception when no_data_found then
-      raise ERROR_USUARIO_NO_EXISTE;
-      --DBMS_OUTPUT.put_line('alter system kill session '||''''||VAR_SID||','||VAR_SERIAL#|| '#'|| '''');
+
+      --Extraemos el SID y el SERIAL de la sesión del usuario
+      --Son los valores que necesitamos para llamar a ALTER SYSTEM KILL SESSION
+      SELECT sid into VAR_SID from v_$session where username = usuario;
+      SELECT serial# into VAR_SERIAL# from v_$session where username = usuario;
+
+      --Excepciones del SELECT
+      EXCEPTION
+      WHEN NO_DATA_FOUND THEN RAISE ERROR_USUARIO_NO_EXISTE;
+      WHEN OTHERS THEN RAISE ERROR_DESCONOCIDO;
     END;
-  BEGIN
-    EXECUTE IMMEDIATE 'alter system kill session '''||VAR_SID||','||VAR_SERIAL#||''' ';
-    exception when others then DBMS_OUTPUT.put_line('Error al matar sesión.');
-  END;  
+
+    --BEGIN del ALTER SYSTEM KILL SESSION
+    BEGIN
+      --DBMS_OUTPUT.put_line('ALTER SYSTEM KILL SESSION '||''''||VAR_SID||','||VAR_SERIAL#|| '#'|| '''');
+      EXECUTE IMMEDIATE 'ALTER SYSTEM KILL SESSION '''||VAR_SID||','||VAR_SERIAL#||''' ';
+
+      --Excepciones del ALTER SYSTEM KILL SESSION
+      EXCEPTION
+      WHEN OTHERS THEN DBMS_OUTPUT.put_line('Error al matar sesión.');
+    END;  
   
-  exception
-    when ERROR_USUARIO_NO_EXISTE then DBMS_OUTPUT.put_line('El usuario '||usuario||' no tiene la sesión iniciada.');
-    when others then DBMS_OUTPUT.put_line('Error desconocido.');
+    --Tratamiento de excepciones del procedimiento
+    EXCEPTION
+    WHEN ERROR_USUARIO_NO_EXISTE THEN DBMS_OUTPUT.put_line('El usuario '||usuario||' no tiene la sesión iniciada.');
+    WHEN OTHERS THEN DBMS_OUTPUT.put_line('Error desconocido.');
   
   END MATAR_SESION;
-  
+
+
+---------------------------------------------------------
+---------------------------------------------------------
 
 
 END GEST_USUARIO;
