@@ -1,17 +1,14 @@
 create or replace 
 PACKAGE BODY ESTADISTICAS_ALU AS
 
-  -- Busca los ejercicios con el mayor número de fallos y los muestra. Solo da aquellos cuyo número de fallos es max(fallos)  
-   PROCEDURE MAS_FALLOS AS
-   ejer_id docencia.ejercicio.ejercicio_id%type;
-   ejercicio_enunciado docencia.ejercicio.enunciado%type;
-   ejercicio_fallos docencia.ejercicio.fallos%type;
-   CURSOR ejer_cur is -- Cursor que tiene los ejercicios donde más se ha fallado (todos tienen el mismo nº de fallos)
-       select ejercicio_id,enunciado,fallos from docencia.ejercicio
-       where fallos in (select max(fallos) from docencia.ejercicio);
-       
-    BEGIN
-       /* Otra forma propuesta por felipe. La veo más complicada. Fdo: Haritz Beck
+  procedure MAS_FALLOS AS
+   ejer_id ejercicio.ejercicio_id%type;
+   ejercicio_enunciado ejercicio.enunciado%type;
+   ejercicio_fallos ejercicio.fallos%type;
+   CURSOR ejer_cur is 
+       select ejercicio_id,enunciado,fallos from ejercicio
+       where fallos in (select max(fallos) from ejercicio);
+    BEGIN  
        OPEN ejer_cur;
        LOOP
           FETCH ejer_cur into ejer_id, ejercicio_enunciado,ejercicio_fallos;
@@ -19,25 +16,20 @@ PACKAGE BODY ESTADISTICAS_ALU AS
           dbms_output.put_line('ID= '||ejer_id || ' ' || ejercicio_enunciado || ' #Fallos=' ||ejercicio_fallos);
        END LOOP;
        CLOSE ejer_cur;
-       */
-       FOR ejercicio IN ejer_cur LOOP
-          ejer_id := ejercicio.ejercicio_id;
-          ejercicio_enunciado := ejercicio.enunciado;
-          ejercicio_fallos := ejercicio.fallos;
-          dbms_output.put_line('ID= '||ejer_id || ' ' || ejercicio_enunciado || ' #Fallos=' ||ejercicio_fallos);
-       END LOOP;
-       
-       IF ejer_cur%ISOPEN = TRUE THEN 
-        CLOSE ejer_cur;
-       END IF;
        
        EXCEPTION
-       WHEN others then
+       when others then
        dbms_output.put_line('Error, no se ha podido encontrar los ejercicios');
   END MAS_FALLOS;
-
-
- procedure antiplagio_relacion(relacion_id in number) as
+  
+  
+  /**
+  Dada una relacion, halla el minimo tiempo y si el alumno 
+  ha realizado la relacion en menos tiempo .
+  Muestra esa información
+  
+  */
+  procedure antiplagio_relacion(relacion_id in number) as
     
    dedic_tiempo_dias number;
    dedic_tiempo_horas number;
@@ -51,8 +43,8 @@ PACKAGE BODY ESTADISTICAS_ALU AS
     suma_total_min number;
     
     tiempo_min number;
-     
-  
+     excepcion_no_tiempo_minimo exception; 
+    excepcion_rel_no_terminada exception;
   CURSOR alum_rel(p_alu_usuario  number)  is
     select docencia.audit_ejer.fecha_inicio, docencia.audit_ejer.fecha_entrega_correcto from docencia.audit_ejer
     inner join 
@@ -61,11 +53,16 @@ PACKAGE BODY ESTADISTICAS_ALU AS
     on docencia.audit_ejer.ejercicio_id = t2.ejercicio_ejercicio_id 
     where docencia.audit_ejer.usuario_id = p_alu_usuario and docencia.audit_ejer.fecha_entrega_correcto is not null;
    BEGIN
+   begin
    select usuario_usuario_id into alu_usuario_id  from relacion ;
    select tiempo_minimo
    into tiempo_min 
    from relacion
    where relacion.relacion_id = relacion_id;
+   exception
+   when others then
+   raise excepcion_no_tiempo_minimo;
+   end;
     dedic_tiempo_dias := 0;
     dedic_tiempo_horas := 0;
     dedic_tiempo_minutos := 0;
@@ -74,10 +71,15 @@ PACKAGE BODY ESTADISTICAS_ALU AS
     suma_total_min := 0;
     
       FOR calif IN alum_rel(alu_usuario_id) LOOP
+      begin
       dedic_tiempo_dias := dedic_tiempo_dias + extract(day from (calif.fecha_inicio - calif.fecha_entrega_correcto)); 
       dedic_tiempo_horas := dedic_tiempo_horas + extract(hour from (calif.fecha_inicio - calif.fecha_entrega_correcto));
       dedic_tiempo_minutos := dedic_tiempo_minutos + extract(minute from (calif.fecha_inicio - calif.fecha_entrega_correcto));
       dedic_tiempo_segundos := dedic_tiempo_segundos + extract (second from (calif.fecha_inicio - calif.fecha_entrega_correcto));
+      exception
+      when others then 
+      raise excepcion_rel_no_terminada;
+      END;
     END LOOP;
     /*
     OPEN alum_rel;
@@ -108,12 +110,40 @@ PACKAGE BODY ESTADISTICAS_ALU AS
   end if;
      
   exception
+  when excepcion_no_tiempo_minimo
+  then
+  dbms_output.put_line('No se ha introducido un tiempo minimo para la relacion '||relacion_id||'!!');
+  when excepcion_rel_no_terminada
+  then
+  dbms_output.put_line('El alumno aun no ha acabado la relacion o no ha empezado!!');
   when others then
   dbms_output.put_line('Error desconocido');
     IF alum_rel%ISOPEN = TRUE THEN 
     CLOSE alum_rel;
   END IF;
     end antiplagio_relacion;
+
+
+
+  --Igual que la anterior pero muestra el antiplagio de todas las relaciones
+  procedure antiplagio_relacion_todas as
+  cursor rel_cur is
+  select relacion_id from relacion
+  ;
+  
+  begin
+   FOR calif IN rel_cur LOOP
+      
+      antiplagio_relacion(calif.relacion_id);
+     
+    END LOOP;
+    exception
+    when others then
+    dbms_output.put_line('Error, no se ha podido ejecutar');
+     IF rel_cur%ISOPEN = TRUE THEN 
+    CLOSE rel_cur;
+    end if;
+  end antiplagio_relacion_todas;
 
 
 END ESTADISTICAS_ALU;
