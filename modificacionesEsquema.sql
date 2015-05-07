@@ -16,3 +16,4 @@ alter table relacion add tiempo_minimo number;
 grant create user to docencia;
 grant drop user to docencia;
 grant grant any role to docencia;
+grant alter user to docencia;
