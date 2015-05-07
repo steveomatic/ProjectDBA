@@ -13,4 +13,4 @@ ON DELETE CASCADE;
 alter table relacion add tiempo_minimo number;
 
 --permiso explícito para ejecutar los execute immediate!!
-grant create user to docencia;
+grant create user to docencia WITH GRANT OPTION;
