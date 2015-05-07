@@ -217,14 +217,14 @@ PACKAGE BODY CORREC_EJER AS
   ---------------------------------------------------------------------------------------------------------------------------
   ---------------------------------------------------------------------------------------------------------------------------
   ---------------------------------------------------------------------------------------------------------------------------
-  procedure crear_relacion(usuario_id in number, asignatura_asignatura_id in number, tema in number) as
+procedure crear_relacion(usuario_id in number, asignatura_asignatura_id in number, tema in number) as
   ERROR_PRIVS_INSUF exception;
   ERROR_DESCONOCIDO exception;
   ERROR_PK_VIOLADA exception;
 
   begin
     begin
-      insert into docencia.relacion values(relacion_seq.NEXTVAL,tema,usuario_id,asignatura_asignatura_id);
+      insert into docencia.relacion(relacion_id,tema,usuario_usuario_id,asignatura_asignatura_id) values(relacion_seq.NEXTVAL,tema,usuario_id,asignatura_asignatura_id);
       EXCEPTION WHEN OTHERS THEN 
         IF SQLCODE = -1031 then raise ERROR_PRIVS_INSUF;
         ELSIF SQLCODE = -1 THEN RAISE ERROR_PK_VIOLADA;
