@@ -219,7 +219,7 @@ procedure correccion_alu(cor_usuario_id in number,cor_relacion_id in number , co
     where ejercicio_id = cor_ejercicio_id;
     
   WHEN ERROR_DESCONOCIDO THEN 
-    DBMS_OUTPUT.PUT_LINE('Error desconocido');
+    DBMS_OUTPUT.PUT_LINE('Error desconocido correccion');
     update calif_ejercicio
     set nota = 0
     where usuario_usuario_id = cor_usuario_id 
@@ -278,7 +278,7 @@ procedure correccion_alu(cor_usuario_id in number,cor_relacion_id in number , co
     exception
     when ERROR_PRIVS_INSUF then DBMS_OUTPUT.put_line('Error: no se tienen privilegios suficientes');
    
-    when ERROR_DESCONOCIDO then DBMS_OUTPUT.put_line('Error desconocido');
+    when ERROR_DESCONOCIDO then DBMS_OUTPUT.put_line('Error desconocido correccion');
     end responder;
     
     
@@ -288,17 +288,21 @@ procedure ver_preguntas(ver_usuario_id in number, ver_relacion_id in number, ver
    ejer_id  ejercicio.ejercicio_id%type;
    ejercicio_enunciado ejercicio.enunciado%type;
    ejercicio_retribucion ejercicio.retribucion%type;
+   
    CURSOR ejer_cur is
-       select ejercicio_id,enunciado,retribucion from ejercicio
-       where ejercicio_id in 
-       (
-       select ejercicio_id from calif_ejercicio 
+   
+       select ejercicio.ejercicio_id,ejercicio.enunciado,ejercicio.retribucion 
+       from ejercicio JOIN  calif_ejercicio
+       on ejercicio.ejercicio_id = calif_ejercicio.ejercicio_ejercicio_id
        where 
-       usuario_usuario_id = ver_usuario_id
+       ejercicio.ejercicio_id = calif_ejercicio.ejercicio_ejercicio_id
        and
-       relacion_relacion_id = ver_relacion_id
-       and asignatura_id = ver_asignatura_id
-       );
+       calif_ejercicio.usuario_usuario_id = ver_usuario_id
+       and
+       calif_ejercicio.relacion_relacion_id = ver_relacion_id
+       and 
+       calif_ejercicio.asignatura_id = ver_asignatura_id
+       ; 
         ERROR_PRIVS_INSUF exception;
     ERROR_DESCONOCIDO exception;
                 
@@ -339,7 +343,7 @@ procedure ver_preguntas(ver_usuario_id in number, ver_relacion_id in number, ver
            CLOSE ejer_cur;
         END IF;
       when ERROR_DESCONOCIDO then
-      DBMS_OUTPUT.put_line('Error desconocido');
+      DBMS_OUTPUT.put_line('Error desconocido de responder');
         IF ejer_cur%ISOPEN
         THEN
            CLOSE ejer_cur;
