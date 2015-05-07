@@ -20,8 +20,6 @@ GRANT INSERT, DELETE, ALTER on DOCENCIA.ASIGNATURA TO R_ADMINISTRATIVO;
 GRANT INSERT, DELETE, ALTER on DOCENCIA.MATRICULA TO R_ADMINISTRATIVO;
 
 grant create user to R_ADMINISTRATIVO;
---SUPONIENDO QUE YA ESTÁN creados los procedimientos
--- Conviene que los cree system, y darle privilegios de ejecución tanto a profesor como a administrativo
 
 
 
