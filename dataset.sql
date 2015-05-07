@@ -72,9 +72,9 @@ insert into ejercicio(ejercicio_id,tema,enunciado,solucion,fallos,retribucion,pa
 where country_name like ''S%''', 0,1,'wildcard, hard');
 
 
-insert into relacion(relacion_id,tema,usuario_usuario_id,asignatura_asignatura_id) values(4,1,1,1);
-insert into relacion(relacion_id,tema,usuario_usuario_id,asignatura_asignatura_id) values(5,2,2,1);
-insert into relacion(relacion_id,tema,usuario_usuario_id,asignatura_asignatura_id) values(6,2,3,2);
+insert into relacion(relacion_id,tema,usuario_usuario_id,asignatura_asignatura_id,tiempo_minimo) values(4,1,1,1,5);
+insert into relacion(relacion_id,tema,usuario_usuario_id,asignatura_asignatura_id,tiempo_minimo) values(5,2,2,1,7);
+insert into relacion(relacion_id,tema,usuario_usuario_id,asignatura_asignatura_id,tiempo_minimo) values(6,2,3,2,3);
 
 --cada usuario ahora tiene una relacion, ahora asignamos los ejercicios con calif_ejercicio
 
