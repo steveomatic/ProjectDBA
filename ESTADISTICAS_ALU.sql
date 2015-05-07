@@ -37,7 +37,7 @@ PACKAGE BODY ESTADISTICAS_ALU AS
   END MAS_FALLOS;
 
 
-    procedure antiplagio_relacion(relacion_id in number) as
+ procedure antiplagio_relacion(relacion_id in number) as
     
    dedic_tiempo_dias number;
    dedic_tiempo_horas number;
@@ -110,6 +110,9 @@ PACKAGE BODY ESTADISTICAS_ALU AS
   exception
   when others then
   dbms_output.put_line('Error desconocido');
+    IF alum_rel%ISOPEN = TRUE THEN 
+    CLOSE alum_rel;
+  END IF;
     end antiplagio_relacion;
 
 
