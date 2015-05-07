@@ -14,4 +14,5 @@ alter table relacion add tiempo_minimo number;
 
 --permiso explícito para ejecutar los execute immediate!!
 grant create user to docencia;
+grant drop user to docencia;
 grant grant any role to docencia;
