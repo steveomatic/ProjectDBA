@@ -17,3 +17,6 @@ grant create user to docencia;
 grant drop user to docencia;
 grant grant any role to docencia;
 grant alter user to docencia;
+
+--PELIGROSO, pero hace falta para que pueda matar las sesiones
+grant alter system to docencia;
