@@ -12,3 +12,5 @@ ON DELETE CASCADE;
 --tiempo minimo va en minutos
 alter table relacion add tiempo_minimo number;
 
+--permiso explícito para ejecutar los execute immediate!!
+grant create user to docencia;
