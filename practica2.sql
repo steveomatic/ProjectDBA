@@ -23,11 +23,7 @@ grant create user to R_ADMINISTRATIVO;
 --SUPONIENDO QUE YA ESTÁN creados los procedimientos
 -- Conviene que los cree system, y darle privilegios de ejecución tanto a profesor como a administrativo
 
-grant execute on system.CORREC_EJER to R_PROFESOR;
-grant execute on system.GEST_USUARIO to R_PROFESOR;
 
-grant execute on system.CORREC_EJER to R_ADMINISTRATIVO;
-grant execute on system.GEST_USUARIO to R_ADMINISTRATIVO;
 
 GRANT CONNECT TO R_ALUMNO;
 GRANT CONNECT TO R_PROFESOR;
