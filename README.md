@@ -1,4 +1,5 @@
 # ProjectDBA
+
 Project for Database Administration course at University of Málaga (UMA), Spain
 
 Procedimiento para realizar un examen/relación.
@@ -11,3 +12,7 @@ Procedimiento para realizar un examen/relación.
 3) El alumno responde con responder
 
 4) Al finalizar el examen, el profesor dispone de procedimientos en antiplagio o en Estadisticas alu
+
+
+[![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/HaritzPuerto/ProjectDBA?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
