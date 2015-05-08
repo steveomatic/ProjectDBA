@@ -35,7 +35,7 @@ PACKAGE BODY ESTADISTICAS_ALU AS
        dbms_output.put_line('Error, no se ha podido encontrar los ejercicios');
   END MAS_FALLOS;
   
-    procedure DEDICACION_ALU_RELACION(alu_usuario_id IN NUMBER, rel_relacion_id IN NUMBER) AS
+procedure DEDICACION_ALU_RELACION(alu_usuario_id IN NUMBER, rel_relacion_id IN NUMBER) AS
   
   dedic_tiempo_dias number;
   dedic_tiempo_horas number;
@@ -43,6 +43,9 @@ PACKAGE BODY ESTADISTICAS_ALU AS
   dedic_tiempo_segundos number;
   fecha_inicio_al docencia.audit_ejer.fecha_inicio%type;
   fecha_fin_al docencia.audit_ejer.fecha_entrega_correcto%type;
+  ER_NO_EXISTE_USER exception;
+  ER_NO_EXISTE_REL exception;
+  existe_user_rel number;
   
   CURSOR alum_rel is
     select docencia.audit_ejer.fecha_inicio, docencia.audit_ejer.fecha_entrega_correcto from docencia.audit_ejer
@@ -57,12 +60,20 @@ PACKAGE BODY ESTADISTICAS_ALU AS
     dedic_tiempo_minutos := 0;
     dedic_tiempo_segundos := 0;
     
+  BEGIN
+    select count(*) into existe_user_rel from docencia.usuario where usuario_id = alu_usuario_id;
+    IF existe_user_rel = 0 then RAISE ER_NO_EXISTE_USER;
+    END IF;
+    select count(*) into existe_user_rel from docencia.relacion where rel_relacion_id = docencia.relacion.relacion_id;
+    IF existe_user_rel = 0 then RAISE ER_NO_EXISTE_REL;
+    END IF;
+  END;
     
     FOR calif IN alum_rel LOOP
-      dedic_tiempo_dias := dedic_tiempo_dias + extract(day from (calif.fecha_inicio - calif.fecha_entrega_correcto)); 
-      dedic_tiempo_horas := dedic_tiempo_horas + extract(hour from (calif.fecha_inicio - calif.fecha_entrega_correcto));
-      dedic_tiempo_minutos := dedic_tiempo_minutos + extract(minute from (calif.fecha_inicio - calif.fecha_entrega_correcto));
-      dedic_tiempo_segundos := dedic_tiempo_segundos + extract (second from (calif.fecha_inicio - calif.fecha_entrega_correcto));
+      dedic_tiempo_dias := dedic_tiempo_dias + extract(day from (calif.fecha_entrega_correcto - calif.fecha_inicio)); 
+      dedic_tiempo_horas := dedic_tiempo_horas + extract(hour from (calif.fecha_entrega_correcto - calif.fecha_inicio));
+      dedic_tiempo_minutos := dedic_tiempo_minutos + extract(minute from (calif.fecha_entrega_correcto - calif.fecha_inicio));
+      dedic_tiempo_segundos := dedic_tiempo_segundos + extract (second from (calif.fecha_entrega_correcto - calif.fecha_inicio));
     END LOOP;
     /*
     OPEN alum_rel;
@@ -87,7 +98,10 @@ PACKAGE BODY ESTADISTICAS_ALU AS
   DBMS_OUTPUT.PUT_LINE(dedic_tiempo_minutos ||' minutos');
   DBMS_OUTPUT.PUT_LINE(dedic_tiempo_segundos ||' segundos.');
   
-  EXCEPTION when others then DBMS_OUTPUT.PUT_LINE('Error desconocido');
+  EXCEPTION 
+  when ER_NO_EXISTE_USER then DBMS_OUTPUT.PUT_LINE('Error, no existe el usuario');
+  when ER_NO_EXISTE_REL then DBMS_OUTPUT.PUT_LINE('Error, no existe la relación');
+  when others then DBMS_OUTPUT.PUT_LINE('Error desconocido');
   
   END DEDICACION_ALU_RELACION;
   
