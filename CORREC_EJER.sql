@@ -160,9 +160,11 @@ PACKAGE BODY CORREC_EJER AS
     AND
     ejercicio_ejercicio_id = cor_ejercicio_id;
     
-    update ejercicio
-    set fallos = fallos+1
-    where ejercicio_id = cor_ejercicio_id;
+    IF SQL%ROWCOUNT != 0 THEN
+      update ejercicio
+      set fallos = fallos+1
+      where ejercicio_id = cor_ejercicio_id;
+    END IF;
   END poner_cero;
 
   ---------------------------------------------------------------------------------------------------------------------------
