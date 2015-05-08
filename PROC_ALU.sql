@@ -2,7 +2,7 @@ create or replace
 PACKAGE BODY PROC_ALU AS
 
 
-procedure correccion_alu(cor_usuario_id in number,cor_relacion_id in number , cor_ejercicio_id in number, cor_asignatura_id in number)AS
+procedure correccion_alu(cor_relacion_id in number , cor_ejercicio_id in number, cor_asignatura_id in number)AS
    /* 
   v_alu_query variable que guarda la query 
   enviada por el alumno y despues la ejecuta.
@@ -25,9 +25,12 @@ procedure correccion_alu(cor_usuario_id in number,cor_relacion_id in number , co
   
   v_retrib number;
   
+  cor_usuario_id NUMBER;
   
   BEGIN
-  
+  SELECT usuario_id INTO cor_usuario_id -- este select coge el usuario_id del que llama al procedure
+    FROM DOCENCIA.usuario
+    WHERE UPPER(usuario.nombre) = UPPER(user);  
   --Se usuará para comprobar si ambas diferencias de tablas están a 0
   v_respuestas_bien :=0;
   
