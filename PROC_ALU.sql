@@ -282,22 +282,23 @@ procedure correccion_alu(cor_usuario_id in number,cor_relacion_id in number , co
     end responder;
     
     
-    --para cada relacion, visualiza cada pregunta
-procedure ver_preguntas(ver_usuario_id in number, ver_relacion_id in number, ver_asignatura_id in number) as
+--para cada relacion, visualiza cada pregunta. Si es la primera vez que se ve el ejercicio, se inserta la fecha de inicio (hoy)
+procedure ver_preguntas(ver_relacion_id in number, ver_asignatura_id in number) as
 
    ejer_id  ejercicio.ejercicio_id%type;
    ejercicio_enunciado ejercicio.enunciado%type;
    ejercicio_retribucion ejercicio.retribucion%type;
+   ver_usuario_id INTEGER;
    
-   CURSOR ejer_cur is
-   
+   CURSOR ejer_cur (par_usuario INTEGER) is -- el param. del cursor es el usuario id del que llama al procedure
+   -- este cursor coge datos sobre los ejercicios de una relación
        select ejercicio.ejercicio_id,ejercicio.enunciado,ejercicio.retribucion 
        from ejercicio JOIN  calif_ejercicio
        on ejercicio.ejercicio_id = calif_ejercicio.ejercicio_ejercicio_id
        where 
        ejercicio.ejercicio_id = calif_ejercicio.ejercicio_ejercicio_id
        and
-       calif_ejercicio.usuario_usuario_id = ver_usuario_id
+       calif_ejercicio.usuario_usuario_id = par_usuario
        and
        calif_ejercicio.relacion_relacion_id = ver_relacion_id
        and 
@@ -307,33 +308,34 @@ procedure ver_preguntas(ver_usuario_id in number, ver_relacion_id in number, ver
     ERROR_DESCONOCIDO exception;
                 
     BEGIN
-       OPEN ejer_cur;
+    
+    SELECT usuario_id INTO ver_usuario_id -- este select coge el usuario_id del que llama al procedure
+    FROM DOCENCIA.usuario
+    WHERE UPPER(usuario.nombre) = UPPER(user);  
+    
+       OPEN ejer_cur(ver_usuario_id);
        LOOP
           FETCH ejer_cur into ejer_id, ejercicio_enunciado,ejercicio_retribucion;
           EXIT WHEN ejer_cur%notfound;
           dbms_output.put_line('ID= '||ejer_id || ' ' || ejercicio_enunciado || ' #Puntos=' ||ejercicio_retribucion);
           begin
           
-          insert into audit_ejer(usuario_id,ejercicio_id,fecha_inicio)
-          select ver_usuario_id,ejer_id,sysdate from dual
-          where not exists (
-          select 1 from audit_ejer
-          where usuario_id = ver_usuario_id
-          and
-          ejer_id = ejercicio_id
-          );
-           EXCEPTION WHEN OTHERS THEN 
-          IF SQLCODE = -1031 then raise ERROR_PRIVS_INSUF;
-          ELSE raise ERROR_DESCONOCIDO;
-          END IF;
-          
+            insert into audit_ejer(usuario_id,ejercicio_id,fecha_inicio) -- Si es la primera vez que se ve el ejercicio, se inserta la fecha de inicio (hoy)
+            select ver_usuario_id,ejer_id,sysdate from dual
+              where not exists (
+                select 1 from audit_ejer
+                  where usuario_id = ver_usuario_id
+                  and
+                  ejer_id = ejercicio_id
+              );
+            EXCEPTION WHEN OTHERS THEN 
+              IF SQLCODE = -1031 then raise ERROR_PRIVS_INSUF;
+              ELSE raise ERROR_DESCONOCIDO;
+              END IF;
           end;
-          
           
        END LOOP;
        CLOSE ejer_cur;
-       
-       
        
        EXCEPTION
         when ERROR_PRIVS_INSUF then 
