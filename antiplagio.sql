@@ -42,9 +42,8 @@ PACKAGE BODY ANTIPLAGIO AS
    alu_usuario_id docencia.relacion.usuario_usuario_id%type;
   
     suma_total_min number;
-    
     tiempo_min number;
-     excepcion_no_tiempo_minimo exception; 
+    excepcion_no_tiempo_minimo exception; 
     excepcion_rel_no_terminada exception;
   CURSOR alum_rel(p_alu_usuario  number)  is
     select docencia.audit_ejer.fecha_inicio, docencia.audit_ejer.fecha_entrega_correcto from docencia.audit_ejer
@@ -55,14 +54,10 @@ PACKAGE BODY ANTIPLAGIO AS
     where docencia.audit_ejer.usuario_id = p_alu_usuario and docencia.audit_ejer.fecha_entrega_correcto is not null;
    BEGIN
    begin
-   select usuario_usuario_id into alu_usuario_id  from relacion ;
-   select tiempo_minimo
-   into tiempo_min 
-   from relacion
-   where relacion.relacion_id = relacion_id;
-   exception
-   when others then
-   raise excepcion_no_tiempo_minimo;
+     select usuario_usuario_id into alu_usuario_id  from relacion;
+     select tiempo_minimo into tiempo_min from docencia.relacion where docencia.relacion.relacion_id = relacion_id;
+     DBMS_OUTPUT.PUT_LINE(tiempo_min);
+     exception when others then raise excepcion_no_tiempo_minimo;
    end;
     dedic_tiempo_dias := 0;
     dedic_tiempo_horas := 0;
@@ -73,10 +68,10 @@ PACKAGE BODY ANTIPLAGIO AS
     
       FOR calif IN alum_rel(alu_usuario_id) LOOP
       begin
-      dedic_tiempo_dias := dedic_tiempo_dias + extract(day from (calif.fecha_inicio - calif.fecha_entrega_correcto)); 
-      dedic_tiempo_horas := dedic_tiempo_horas + extract(hour from (calif.fecha_inicio - calif.fecha_entrega_correcto));
-      dedic_tiempo_minutos := dedic_tiempo_minutos + extract(minute from (calif.fecha_inicio - calif.fecha_entrega_correcto));
-      dedic_tiempo_segundos := dedic_tiempo_segundos + extract (second from (calif.fecha_inicio - calif.fecha_entrega_correcto));
+      dedic_tiempo_dias := dedic_tiempo_dias + extract(day from (calif.fecha_entrega_correcto - calif.fecha_inicio)); 
+      dedic_tiempo_horas := dedic_tiempo_horas + extract(hour from (calif.fecha_entrega_correcto - calif.fecha_inicio));
+      dedic_tiempo_minutos := dedic_tiempo_minutos + extract(minute from (calif.fecha_entrega_correcto - calif.fecha_inicio));
+      dedic_tiempo_segundos := dedic_tiempo_segundos + extract (second from (calif.fecha_entrega_correcto - calif.fecha_inicio));
       exception
       when others then 
       raise excepcion_rel_no_terminada;
@@ -105,7 +100,7 @@ PACKAGE BODY ANTIPLAGIO AS
                     dedic_tiempo_segundos/60;
   if suma_total_min <= tiempo_min
   then
-  dbms_output.put_line('WARNING!! Usuario #'||alu_usuario_id||' ha realizado la relación '||relacion_id|| ' en '||suma_total_min);
+  dbms_output.put_line('Atencion: Usuario #'||alu_usuario_id||' ha completado la relación '||relacion_id|| ' en '||suma_total_min||' minuto/s.');
   
   
   end if;
@@ -113,16 +108,17 @@ PACKAGE BODY ANTIPLAGIO AS
   exception
   when excepcion_no_tiempo_minimo
   then
-  dbms_output.put_line('No se ha introducido un tiempo minimo para la relacion '||relacion_id||'!!');
+  dbms_output.put_line('No se ha introducido un tiempo minimo para la relacion '||relacion_id);
   when excepcion_rel_no_terminada
   then
-  dbms_output.put_line('El alumno aun no ha acabado la relacion o no ha empezado!!');
+  dbms_output.put_line('El alumno aun no ha acabado la relacion o no ha empezado.');
   when others then
   dbms_output.put_line('Error desconocido');
     IF alum_rel%ISOPEN = TRUE THEN 
     CLOSE alum_rel;
   END IF;
     end antiplagio_relacion;
+
 
 
 
