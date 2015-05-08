@@ -242,9 +242,10 @@ procedure correccion_alu(cor_usuario_id in number,cor_relacion_id in number , co
   
  
 
-procedure responder(res_respuesta in varchar2,res_relacion_id in number , res_ejercicio_id in number, res_asignatura_id in number) as
+  procedure responder(res_respuesta in varchar2,res_relacion_id in number , res_ejercicio_id in number, res_asignatura_id in number) as
     ERROR_PRIVS_INSUF exception;
     ERROR_DESCONOCIDO exception;
+    ERROR_RESPUESTA_NO_ENVIADA exception;
     respuesta_filtrada DOCENCIA.EJERCICIO.SOLUCION%TYPE;
     res_usuario_id NUMBER;
     begin
@@ -270,21 +271,26 @@ procedure responder(res_respuesta in varchar2,res_relacion_id in number , res_ej
         asignatura_id = res_asignatura_id
         AND
         ejercicio_ejercicio_id = res_ejercicio_id;
+        IF SQL%ROWCOUNT = 0 THEN
+          RAISE ERROR_RESPUESTA_NO_ENVIADA;
+        END IF;
         DBMS_OUTPUT.put_line('Respuesta enviada correctamente');
-        correccion_alu(res_usuario_id,res_relacion_id,res_ejercicio_id, res_asignatura_id);
+        correccion_alu(res_relacion_id,res_ejercicio_id, res_asignatura_id);
         DBMS_OUTPUT.put_line('Respuesta autoevaluada');
-        EXCEPTION WHEN OTHERS THEN 
-          IF SQLCODE = -1031 then raise ERROR_PRIVS_INSUF;
-          ELSE raise ERROR_DESCONOCIDO;
-          END IF;
+        EXCEPTION 
+          WHEN ERROR_RESPUESTA_NO_ENVIADA THEN
+            DBMS_OUTPUT.PUT_LINE('Error: Respuesta no enviada. Compruebe que los parámetros estén bien. ¿Relación correcta? ¿Ejercicio correcto? ¿Asignatura correcta?');
+          WHEN OTHERS THEN 
+            IF SQLCODE = -1031 then raise ERROR_PRIVS_INSUF;
+            ELSE raise ERROR_DESCONOCIDO;
+            END IF;
       end;
      
     exception
-      when ERROR_PRIVS_INSUF then DBMS_OUTPUT.put_line('Error: no se tienen privilegios suficientes');
-      when ERROR_DESCONOCIDO then DBMS_OUTPUT.put_line('Error desconocido correccion');
-      
-    end responder;
-    
+    when ERROR_PRIVS_INSUF then DBMS_OUTPUT.put_line('Error: no se tienen privilegios suficientes');
+   
+    when ERROR_DESCONOCIDO then DBMS_OUTPUT.put_line('Error desconocido correccion');
+    end responder;    
     
     
 
