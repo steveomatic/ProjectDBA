@@ -212,9 +212,10 @@ GRANT select ON Mis_Notas TO R_ALUMNO;
 --llegar al mínimo de la asignatura y al máximo.
 
 --auxiliar
-Create view Mis_notas_total_por_asignatura AS
+Create view mis_notas_total_por_asignatura AS
+(
 select asignatura, SUM(nota) AS nota from mis_notas
-GROUP BY asignatura;
+GROUP BY asignatura);
 GRANT SELECT ON Mis_notas_total_por_asignatura TO R_alumno;
 
 --Solución
