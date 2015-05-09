@@ -147,12 +147,12 @@ ON DELETE CASCADE;
 --(a partir de los cuales ya no se pueden pedir más relaciones). También podrá modificar el número de ejercicios de que consta una relación.
 
 -- Creo una vista auxiliar que me da las notas de las relaciones de todos los alumnos, pero no me da los datos de estos.
-CREATE VIEW Notas_alumnos_sin_datos AS
+CREATE OR REPLACE VIEW Notas_alumnos_sin_datos AS
 SELECT asignatura_id, relacion_relacion_id, SUM(NOTA) AS nota, usuario_usuario_id
 FROM calif_ejercicio
 GROUP BY asignatura_id, relacion_relacion_id, usuario_usuario_id;
 
-CREATE VIEW notas_alumnos AS
+CREATE OR REPLACE VIEW notas_alumnos AS
 SELECT asignatura.nombre as Asignatura, relacion_relacion_id AS Relacion, NOTA, alumno.nombre || ' ' || alumno.apellido1 || ' ' ||
 alumno.apellido2 AS Nombre, alumno.dni, curso_academico, grupo, expediente, alumno.fecha_alta AS "Fecha de alta",
 alumno.fecha_nacimiento AS "Fecha de nacimiento"
@@ -167,7 +167,7 @@ AND matricula.alumno_alumno_id = alumno.alumno_id;
 
 --Ejercicio 8
 --2. Crear los mecanismos necesarios (evalúe las diferentes posibilidades) para que cada alumno sólo pueda ver sus propios datos.
-CREATE VIEW Mis_Datos AS
+CREATE OR REPLACE VIEW Mis_Datos AS
 SELECT alumno.nombre || ' ' || alumno.apellido1 || ' ' ||
 alumno.apellido2 AS Nombre, alumno.dni, curso_academico AS "Curso Académico", grupo, expediente, alumno.fecha_alta AS "Fecha de alta",
 alumno.fecha_nacimiento AS "Fecha de nacimiento"
@@ -179,14 +179,14 @@ AND UPPER(usuario.nombre) = UPPER(user);
 
 
 --3. Dar los permisos necesarios para que un alumno pueda ver los puntos que ha obtenido en cada ejercicio de cada relación
-CREATE VIEW Mis_notas_de_ejercicios AS
+CREATE OR REPLACE VIEW Mis_notas_de_ejercicios AS
 SELECT nota as Nota, relacion_relacion_id AS Relación, ejercicio_ejercicio_id AS Ejercicio
 FROM calif_ejercicio, usuario
 WHERE UPPER(usuario.nombre) = UPPER(user);
 
 
 --4. Dar los permisos necesarios para que un alumno pueda ver los puntos totales que ha obtenido en cada relación
-CREATE VIEW Mis_Notas AS 
+CREATE OR REPLACE VIEW Mis_Notas AS 
 SELECT asignatura.nombre AS Asignatura,  relacion_relacion_id AS Relación, nota
 FROM notas_alumnos_sin_datos, usuario, asignatura
 WHERE notas_alumnos_sin_datos.usuario_usuario_id = usuario.usuario_id
@@ -198,13 +198,13 @@ AND UPPER(usuario.nombre) = UPPER(user);
 --llegar al mínimo de la asignatura y al máximo.
 
 --auxiliar
-Create view Mis_notas_total_por_asignatura AS
+Create OR REPLACE view Mis_notas_total_por_asignatura AS
 select asignatura, SUM(nota) AS nota from mis_notas
 GROUP BY asignatura;
 
 
 --Solución
-CREATE VIEW Mis_puntos_restantes AS
+CREATE OR REPLACE VIEW Mis_puntos_restantes AS
 select asignatura, asignatura.min_puntos - mis_notas_total_por_asignatura.nota
 AS "Puntos restantes para aprobar", asignatura.max_puntos-nota
 AS "Puntos restantes para 10"
@@ -256,30 +256,30 @@ CREATE TABLE audit_ejer
 
 
 -- Esta vista me da la mediana de las notas en cada relación todos los estudiantes
-CREATE VIEW mediana_alu_relacion AS
+CREATE OR REPLACE VIEW mediana_alu_relacion AS
 select nombre, asignatura, median(nota) AS mediana from notas_alumnos
 group by nombre, asignatura;
 -- He usado la mediana porque puede darse el caso de que un estudiante siempre saque 10 y una relación le pasara algo y la hiciese mal.
 -- No sería justo penalizarle tanto como lo haría la media.
 -- Esta vista me ordena por orden ascendiente la mediana de las notas en cada relación todos los estudiantes
-CREATE VIEW Mejores_alu_relacion AS
+CREATE OR REPLACE VIEW Mejores_alu_relacion AS
 select * from mediana_alu_relacion
 ORDER BY mediana asc;
 
 
 -- Vista auxiliar
-CREATE VIEW Notas_alu_tema_sin_datos AS
+CREATE OR REPLACE VIEW Notas_alu_tema_sin_datos AS
 SELECT c.asignatura_id, r.tema, c.relacion_relacion_id, c.NOTA, c.usuario_usuario_id
 FROM calif_ejercicio c , relacion r
 WHERE c.relacion_relacion_id = c.relacion_relacion_id;
 
 -- Vista auxiliar
-CREATE VIEW notas_alu_por_tema AS
+CREATE OR REPLACE VIEW notas_alu_por_tema AS
 SELECT asignatura_id, tema, SUM(nota) AS NOTA, usuario_usuario_id AS usuario FROM Notas_alu_tema_sin_datos
 GROUP BY tema, asignatura_id, usuario_usuario_id;
 
 -- Vista auxiliar
-CREATE VIEW notas_alu_por_tema_datos AS
+CREATE OR REPLACE VIEW notas_alu_por_tema_datos AS
 SELECT asignatura.nombre as Asignatura, tema, NOTA, alumno.nombre || ' ' || alumno.apellido1 || ' ' ||
 alumno.apellido2 AS Nombre, alumno.dni, curso_academico, grupo, expediente, alumno.fecha_alta AS "Fecha de alta",
 alumno.fecha_nacimiento AS "Fecha de nacimiento"
@@ -291,14 +291,14 @@ AND matricula.alumno_alumno_id = alumno.alumno_id;
 
 
 -- Esta vista me da la mediana de las notas en cada relación todos los estudiantes
-CREATE VIEW mediana_alu_tema AS
+CREATE OR REPLACE VIEW mediana_alu_tema AS
 select nombre, asignatura, median(nota) AS mediana from notas_alu_por_tema_datos
 group by nombre, asignatura;
 -- He usado la mediana porque puede darse el caso de que un estudiante siempre saque 10 y una relación le pasara algo y la hiciese mal.
 -- No sería justo penalizarle tanto como lo haría la media.
 -- Esta vista me ordena por orden ascendiente la mediana de las notas en cada relación todos los estudiantes
 
-CREATE VIEW Mejores_alu_tema AS
+CREATE OR REPLACE VIEW Mejores_alu_tema AS
 select * from mediana_alu_tema
 ORDER BY mediana asc;
 
