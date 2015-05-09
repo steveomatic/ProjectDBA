@@ -298,7 +298,7 @@ procedure correccion_alu(cor_relacion_id in number , cor_ejercicio_id in number,
     
     
 --para cada relacion, visualiza cada pregunta. Si es la primera vez que se ve el ejercicio, se inserta la fecha de inicio (hoy)
-procedure ver_preguntas(ver_relacion_id in number, ver_asignatura_id in number) as
+    procedure ver_preguntas(ver_relacion_id in number, ver_asignatura_id in number) as
 
     
 
@@ -338,14 +338,19 @@ procedure ver_preguntas(ver_relacion_id in number, ver_asignatura_id in number) 
           dbms_output.put_line('ID= '||ejer_id || ' ' || ejercicio_enunciado || ' #Puntos=' ||ejercicio_retribucion);
           begin
           
-            insert into audit_ejer(usuario_id,ejercicio_id,fecha_inicio) -- Si es la primera vez que se ve el ejercicio, se inserta la fecha de inicio (hoy)
-            select ver_usuario_id,ejer_id,sysdate from dual
+            insert into docencia.audit_ejer(usuario_id,ejercicio_id,relacion_id, asignatura_id, fecha_inicio,fecha_entrega_ultima,fecha_entrega_correcto) 
+            select ver_usuario_id,ejer_id,ver_relacion_id,ver_asignatura_id, systimestamp,null,null from dual
               where not exists (
-                select 1 from audit_ejer
-                  where usuario_id = ver_usuario_id
+                select 1 from docencia.audit_ejer
+                  where docencia.audit_ejer.usuario_id = ver_usuario_id
                   and
-                  ejer_id = ejercicio_id
+                  ejer_id = docencia.audit_ejer.ejercicio_id
+                  and
+                  ver_relacion_id = docencia.audit_ejer.relacion_id
+                  and
+                  ver_asignatura_id = docencia.audit_ejer.asignatura_id
               );
+              
             EXCEPTION WHEN OTHERS THEN 
               IF SQLCODE = -1031 then raise ERROR_PRIVS_INSUF;
               ELSE raise ERROR_DESCONOCIDO;
