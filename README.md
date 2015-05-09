@@ -13,6 +13,8 @@ Procedimiento para realizar un examen/relación.
 
 4) Al finalizar el examen, el profesor dispone de procedimientos en antiplagio o en Estadisticas alu
 
+5) A parte el alumno cuenta de numerosas vistas y el profesor de vistas estadísticas para estudiar el rendimiento.
+
 
 [![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/HaritzPuerto/ProjectDBA?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
