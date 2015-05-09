@@ -160,6 +160,7 @@ alumno.apellido2 AS Nombre, alumno.dni, curso_academico, grupo, expediente, alum
 alumno.fecha_nacimiento AS "Fecha de nacimiento"
 FROM Notas_alumnos_sin_datos, usuario, matricula, alumno, asignatura
 WHERE Notas_alumnos_sin_datos.usuario_usuario_id = usuario.usuario_id
+AND asignatura.asignatura_id=notas_alumnos_sin_datos.asignatura_id
 AND matricula.usuario_usuario_id = usuario.usuario_id
 AND matricula.alumno_alumno_id = alumno.alumno_id;
 
@@ -226,7 +227,9 @@ AS "Puntos restantes para 10"
 from asignatura, Mis_notas_total_por_asignatura ;
 GRANT SELECT ON Mis_puntos_restantes TO R_alumno;
 --6. Dar los permisos necesarios para que un alumno pueda ver los N alumnos que más puntos llevan acumulados. 
---Para ello se creará un procedimiento que creará una tabla temporal con esos datos. (Por ahora no hay que hacerlo)
+--Para ello se creará un procedimiento que creará una tabla temporal con esos datos.
+
+--RESUELTO EN MEJORES_ALUMNOS.SQL CON EL PROCEDURE N_MEJORES_ASIGNATURA
 
 ----------------------------------------------
 CREATE BITMAP INDEX grupo_idx ON matricula(grupo) tablespace ts_index;
