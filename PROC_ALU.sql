@@ -307,6 +307,7 @@ procedure correccion_alu(cor_relacion_id in number , cor_ejercicio_id in number,
    ejercicio_enunciado ejercicio.enunciado%type;
    ejercicio_retribucion ejercicio.retribucion%type;
    ver_usuario_id INTEGER;
+   suma_filas NUMBER;
    
    CURSOR ejer_cur (par_usuario INTEGER) is -- el param. del cursor es el usuario id del que llama al procedure
    -- este cursor coge datos sobre los ejercicios de una relación
@@ -338,19 +339,22 @@ procedure correccion_alu(cor_relacion_id in number , cor_ejercicio_id in number,
           dbms_output.put_line('ID= '||ejer_id || ' ' || ejercicio_enunciado || ' #Puntos=' ||ejercicio_retribucion);
           begin
           
-            insert into docencia.audit_ejer(usuario_id,ejercicio_id,relacion_id, asignatura_id, fecha_inicio,fecha_entrega_ultima,fecha_entrega_correcto) 
-            select ver_usuario_id,ejer_id,ver_relacion_id,ver_asignatura_id, systimestamp,null,null from dual
-              where not exists (
-                select 1 from docencia.audit_ejer
-                  where docencia.audit_ejer.usuario_id = ver_usuario_id
+            select count(*) into suma_filas from docencia.audit_ejer
+                  where usuario_id = ver_usuario_id
                   and
-                  ejer_id = docencia.audit_ejer.ejercicio_id
+                  ejer_id = ejercicio_id
                   and
-                  ver_relacion_id = docencia.audit_ejer.relacion_id
+                  ver_relacion_id = relacion_id
                   and
-                  ver_asignatura_id = docencia.audit_ejer.asignatura_id
-              );
-              
+                  ver_asignatura_id = asignatura_id;
+            
+            IF suma_filas = 0 then
+              DBMS_OUTPUT.PUT_LINE('Primera vez visto.');      
+              insert into docencia.audit_ejer values(ver_usuario_id, ejer_id, ver_relacion_id, ver_asignatura_id, systimestamp, null, null); 
+            ELSE
+              DBMS_OUTPUT.PUT_LINE('Ya visto.');      
+            END IF;
+                     
             EXCEPTION WHEN OTHERS THEN 
               IF SQLCODE = -1031 then raise ERROR_PRIVS_INSUF;
               ELSE raise ERROR_DESCONOCIDO;
@@ -359,7 +363,7 @@ procedure correccion_alu(cor_relacion_id in number , cor_ejercicio_id in number,
           
        END LOOP;
        CLOSE ejer_cur;
-       
+       commit; --si no, no insertaba.
        EXCEPTION
         when ERROR_PRIVS_INSUF then 
         DBMS_OUTPUT.put_line('Error: no se tienen privilegios suficientes');
@@ -380,7 +384,6 @@ procedure correccion_alu(cor_relacion_id in number , cor_ejercicio_id in number,
            CLOSE ejer_cur;
         END IF;
 end ver_preguntas;
-
     
     
     
