@@ -155,7 +155,7 @@ FROM calif_ejercicio
 GROUP BY asignatura_id, relacion_relacion_id, usuario_usuario_id;
 
 CREATE VIEW notas_alumnos AS
-SELECT asignatura.nombre as Asignatura, relacion_relacion_id AS Relacion, NOTA, alumno.nombre || ' ' || alumno.apellido1 || ' ' ||
+SELECT asignatura.asignatura_id as ID, asignatura.nombre as Asignatura, relacion_relacion_id AS Relacion, NOTA, alumno.nombre || ' ' || alumno.apellido1 || ' ' ||
 alumno.apellido2 AS Nombre, alumno.dni, curso_academico, grupo, expediente, alumno.fecha_alta AS "Fecha de alta",
 alumno.fecha_nacimiento AS "Fecha de nacimiento"
 FROM Notas_alumnos_sin_datos, usuario, matricula, alumno, asignatura

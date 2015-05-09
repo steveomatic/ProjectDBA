@@ -36,7 +36,7 @@ PACKAGE BODY ANTIPLAGIO AS
 ---------------------------------------------------------------------------------------------------------------------------
 
 
- procedure antiplagio_relacion(param_asignatura_id IN NUMBER, param_relacion_id in number, alu_usuario_id in number) AS
+  procedure antiplagio_relacion(param_asignatura_id IN NUMBER, param_relacion_id in number, alu_usuario_id in number) AS
     
    dedic_tiempo_dias number;
    dedic_tiempo_horas number;
@@ -126,6 +126,7 @@ PACKAGE BODY ANTIPLAGIO AS
 ---------------------------------------------------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------------------------------------------------
+
 
 
   --Igual que la anterior pero muestra el antiplagio de todas las relaciones
