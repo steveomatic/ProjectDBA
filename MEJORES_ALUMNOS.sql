@@ -4,12 +4,10 @@ PACKAGE BODY MEJORES_ALUMNOS AS
   PROCEDURE N_MEJORES_ASIGNATURA(asig_id in number, num in number) IS
   
   CURSOR alumnos_cursor is
-   SELECT usuario_id us, sum(nota) n FROM calif_ejercicio, usuario
-    where asignatura_id=1 and usuario_id=usuario_usuario_id
-    GROUP BY usuario_usuario_id
-    order by sum(Nota) desc;
+   select nombre, sum(nota) n from notas_alumnos where asignaturaID=asig_id
+   GROUP BY  nombre, asignatura ORDER BY SUM(nota) desc;
     
-  usuario_nombre USUARIO.NOMBRE%TYPE;
+  usuario_nombre ALUMNO.NOMBRE%TYPE;
   cont number :=1;
   puntos number;
   
@@ -18,7 +16,7 @@ PACKAGE BODY MEJORES_ALUMNOS AS
   FOR al_var in alumnos_cursor LOOP
       
     IF cont<=num  THEN
-    select u.nombre into usuario_nombre from usuario u where usuario_id=al_var.us;
+    usuario_nombre := al_var.nombre;
     puntos := al_var.n;
     DBMS_OUTPUT.PUT_LINE(cont||'. '||usuario_nombre ||' con ' || puntos || ' puntos');
     cont := cont+1;
