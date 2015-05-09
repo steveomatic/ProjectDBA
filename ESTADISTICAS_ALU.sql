@@ -38,6 +38,7 @@ PACKAGE BODY ESTADISTICAS_ALU AS
   
   
   --Da un informe completo del alumno por asignatura
+   --Da un informe completo del alumno por asignatura
   PROCEDURE ANALISIS_ALU_ASIGNATURA(alumno_id number, asignatura_id number) as
   
   nombre_alumno notas_alumnos.nombre%type;
@@ -58,7 +59,7 @@ PACKAGE BODY ESTADISTICAS_ALU AS
   ; 
   cursor rel_cur is
   select relacion,nota,nombre 
-  from notas_alumnos
+  from notas_alumnos_para_procedure
   where alumnoid = alumno_id
   and
   ASIGNATURAID = asignatura_id;
@@ -72,7 +73,7 @@ demasiadas_tuplas_exception exception;
   begin
   select max(nombre)
   into v_nombre_alu
-  from notas_alumnos where alumnoid = alumno_id;
+  from notas_alumnos_para_procedure where alumnoid = alumno_id;
   exception
   when NO_DATA_FOUND then raise no_datos_exception;
   when TOO_MANY_ROWS then raise demasiadas_tuplas_exception;
@@ -81,7 +82,7 @@ demasiadas_tuplas_exception exception;
   begin
   select max(asignatura)
   into v_nombre_asignatura
-  from notas_alumnos
+  from notas_alumnos_para_procedure
   where ASIGNATURAID = asignatura_id;
   exception
   when NO_DATA_FOUND then raise no_datos_exception;
