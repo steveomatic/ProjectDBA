@@ -139,9 +139,11 @@ procedure correccion_alu(cor_relacion_id in number , cor_ejercicio_id in number,
     ejercicio_ejercicio_id = cor_ejercicio_id;
     --aumentar el número de fallos del ejercicio
     
-    update ejercicio
-    set fallos = fallos+1
-    where ejercicio_id = cor_ejercicio_id;
+    IF SQL%ROWCOUNT != 0 THEN
+      update ejercicio
+      set fallos = fallos+1
+      where ejercicio_id = cor_ejercicio_id;
+    END IF;
   
   END IF;
   
@@ -168,9 +170,11 @@ procedure correccion_alu(cor_relacion_id in number , cor_ejercicio_id in number,
     ejercicio_ejercicio_id = cor_ejercicio_id;
     --aumentar el número de fallos del ejercicio
     
-    update ejercicio
-    set fallos = fallos+1
-    where ejercicio_id = cor_ejercicio_id;
+    IF SQL%ROWCOUNT != 0 THEN
+      update ejercicio
+      set fallos = fallos+1
+      where ejercicio_id = cor_ejercicio_id;
+    END IF;
   WHEN ERROR_NO_DATOS then 
     DBMS_OUTPUT.PUT_LINE('No se seleccionó nada.');
     update calif_ejercicio
@@ -184,9 +188,11 @@ procedure correccion_alu(cor_relacion_id in number , cor_ejercicio_id in number,
     ejercicio_ejercicio_id = cor_ejercicio_id;
     --aumentar el número de fallos del ejercicio
     
-    update ejercicio
-    set fallos = fallos+1
-    where ejercicio_id = cor_ejercicio_id;
+    IF SQL%ROWCOUNT != 0 THEN
+      update ejercicio
+      set fallos = fallos+1
+      where ejercicio_id = cor_ejercicio_id;
+    END IF;
   WHEN ERROR_COLUMNAS_DIF THEN 
     DBMS_OUTPUT.PUT_LINE('');
     update calif_ejercicio
@@ -200,9 +206,11 @@ procedure correccion_alu(cor_relacion_id in number , cor_ejercicio_id in number,
     ejercicio_ejercicio_id = cor_ejercicio_id;
     --aumentar el número de fallos del ejercicio
     
-    update ejercicio
-    set fallos = fallos+1
-    where ejercicio_id = cor_ejercicio_id;
+    IF SQL%ROWCOUNT != 0 THEN
+      update ejercicio
+      set fallos = fallos+1
+      where ejercicio_id = cor_ejercicio_id;
+    END IF;
   
   WHEN ERROR_TABLA_NO_EXISTE THEN 
     DBMS_OUTPUT.PUT_LINE('No existe la tabla');
@@ -217,9 +225,11 @@ procedure correccion_alu(cor_relacion_id in number , cor_ejercicio_id in number,
     ejercicio_ejercicio_id = cor_ejercicio_id;
     --aumentar el número de fallos del ejercicio
     
-    update ejercicio
-    set fallos = fallos+1
-    where ejercicio_id = cor_ejercicio_id;
+    IF SQL%ROWCOUNT != 0 THEN
+      update ejercicio
+      set fallos = fallos+1
+      where ejercicio_id = cor_ejercicio_id;
+    END IF;
     
   WHEN ERROR_DESCONOCIDO THEN 
     DBMS_OUTPUT.PUT_LINE('Error desconocido correccion');
@@ -234,9 +244,11 @@ procedure correccion_alu(cor_relacion_id in number , cor_ejercicio_id in number,
     ejercicio_ejercicio_id = cor_ejercicio_id;
     --aumentar el número de fallos del ejercicio
     
-    update ejercicio
-    set fallos = fallos+1
-    where ejercicio_id = cor_ejercicio_id;
+    IF SQL%ROWCOUNT != 0 THEN
+      update ejercicio
+      set fallos = fallos+1
+      where ejercicio_id = cor_ejercicio_id;
+    END IF;
   
   END correccion_alu;
   
