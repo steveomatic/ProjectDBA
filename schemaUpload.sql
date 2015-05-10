@@ -299,14 +299,14 @@ AND asignatura.asignatura_id=notas_alu_por_tema.asignatura_id;
 
 
 
--- Esta vista me da la mediana de las notas en cada relación todos los estudiantes
+-- Esta vista me da la mediana de las notas en cada tema todos los estudiantes
 CREATE OR REPLACE VIEW mediana_alu_tema AS
 select nombre, asignatura, median(nota) AS mediana from notas_alu_por_tema_datos
 group by nombre, asignatura;
--- He usado la mediana porque puede darse el caso de que un estudiante siempre saque 10 y una relación le pasara algo y la hiciese mal.
+-- He usado la mediana porque puede darse el caso de que un estudiante siempre saque 10 y un tema le pasara algo y la hiciese mal.
 -- No sería justo penalizarle tanto como lo haría la media.
--- Esta vista me ordena por orden ascendiente la mediana de las notas en cada relación todos los estudiantes
 
+-- Esta vista me ordena por orden ascendiente la mediana de las notas en cada tema todos los estudiantes
 CREATE OR REPLACE VIEW Mejores_alu_tema AS
 select * from mediana_alu_tema
 ORDER BY mediana asc;
@@ -319,7 +319,8 @@ alumno.fecha_nacimiento AS "Fecha de nacimiento"
 FROM Notas_alumnos_sin_datos, usuario, matricula, alumno, asignatura
 WHERE Notas_alumnos_sin_datos.usuario_usuario_id = usuario.usuario_id
 AND matricula.usuario_usuario_id = usuario.usuario_id
-AND matricula.alumno_alumno_id = alumno.alumno_id;
+AND matricula.alumno_alumno_id = alumno.alumno_id
+AND notas_alumnos_sin_datos.asignatura_id = asignatura.asignatura_id;
 
 
 insert into alumno(alumno_id,dni,nombre,apellido1,apellido2,expediente,fecha_alta,fecha_nacimiento) values(1,'999999X','Robert','Liam','Curtis','00001',sysdate,sysdate-20);
