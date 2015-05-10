@@ -262,17 +262,6 @@ CREATE TABLE audit_ejer
 
 
 
--- Esta vista me da la mediana de las notas en cada relación todos los estudiantes
-CREATE OR REPLACE VIEW mediana_alu_relacion AS
-select nombre, asignatura, median(nota) AS mediana from notas_alumnos
-group by nombre, asignatura;
--- He usado la mediana porque puede darse el caso de que un estudiante siempre saque 10 y una relación le pasara algo y la hiciese mal.
--- No sería justo penalizarle tanto como lo haría la media.
-
--- Esta vista me ordena por orden ascendiente la mediana de las notas en cada relación todos los estudiantes
-CREATE OR REPLACE VIEW Mejores_alu_relacion AS
-select * from mediana_alu_relacion
-ORDER BY mediana asc;
 
 
 -- Vista auxiliar
@@ -306,10 +295,10 @@ group by nombre, asignatura;
 -- He usado la mediana porque puede darse el caso de que un estudiante siempre saque 10 y un tema le pasara algo y la hiciese mal.
 -- No sería justo penalizarle tanto como lo haría la media.
 
--- Esta vista me ordena por orden ascendiente la mediana de las notas en cada tema todos los estudiantes
+-- Esta vista me ordena por orden descendiente la mediana de las notas en cada tema todos los estudiantes
 CREATE OR REPLACE VIEW Mejores_alu_tema AS
 select * from mediana_alu_tema
-ORDER BY mediana asc;
+ORDER BY mediana desc;
 
 
 CREATE OR REPLACE VIEW notas_alumnos_para_procedure AS

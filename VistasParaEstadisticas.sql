@@ -1,19 +1,3 @@
--- Esta vista me da la mediana de las notas en cada relación todos los estudiantes
-CREATE VIEW mediana_alu_relacion AS
-select nombre, asignatura, median(nota) AS mediana from notas_alumnos
-group by nombre, asignatura;
--- He usado la mediana porque puede darse el caso de que un estudiante siempre saque 10 y una relación le pasara algo y la hiciese mal.
--- No sería justo penalizarle tanto como lo haría la media.
--- Esta vista me ordena por orden ascendiente la mediana de las notas en cada relación todos los estudiantes
-CREATE VIEW Mejores_alu_relacion AS
-select * from mediana_alu_relacion
-ORDER BY mediana asc;
-
-GRANT SELECT ON Mejores_alu_relacion TO R_PROFESOR;
---------------------------------------------------------------------------------------------------------------------------
---------------------------------------------------------------------------------------------------------------------------
---------------------------------------------------------------------------------------------------------------------------
-
 -- Vista auxiliar
 CREATE OR REPLACE VIEW Notas_alu_tema_sin_datos AS
 SELECT c.asignatura_id, r.tema, c.relacion_relacion_id, c.NOTA, c.usuario_usuario_id
@@ -45,10 +29,10 @@ group by nombre, asignatura;
 -- He usado la mediana porque puede darse el caso de que un estudiante siempre saque 10 y un tema le pasara algo y la hiciese mal.
 -- No sería justo penalizarle tanto como lo haría la media.
 
--- Esta vista me ordena por orden ascendiente la mediana de las notas en cada tema todos los estudiantes
+-- Esta vista me ordena por orden descendiente la mediana de las notas en cada tema todos los estudiantes
 CREATE VIEW Mejores_alu_tema AS
 select * from mediana_alu_tema
-ORDER BY mediana asc;
+ORDER BY mediana desc;
 
 GRANT SELECT ON Mejores_alu_tema TO R_PROFESOR;
 
