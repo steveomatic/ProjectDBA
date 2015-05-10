@@ -36,6 +36,8 @@ PACKAGE BODY ANTIPLAGIO AS
 ---------------------------------------------------------------------------------------------------------------------------
 
 
+-- Mira si la relación param_relacion_id de la asignatura param_asignatura_id
+--se ha realizado en menos tiempo del mínimo estipulado por el profedor
   procedure antiplagio_relacion(param_asignatura_id IN NUMBER, param_relacion_id in number) AS
     
    dedic_tiempo_dias number;
@@ -53,7 +55,7 @@ PACKAGE BODY ANTIPLAGIO AS
    excepcion_rel_no_terminada exception;
    excepcion_no_alu           exception;
    CURSOR alum_rel(alu_usuario_id number) is -- Nos da fecha de inicio, fecha de entrega, de cada ejercicio de la relacion, asignatura y alumnno dados
-    select docencia.audit_ejer.fecha_inicio, docencia.audit_ejer.fecha_entrega_correcto 
+    select docencia.audit_ejer.fecha_inicio, docencia.audit_ejer.fecha_entrega_ultima 
     from docencia.audit_ejer 
     where docencia.audit_ejer.relacion_id = param_relacion_id AND docencia.audit_ejer.asignatura_id = param_asignatura_id AND docencia.audit_ejer.usuario_id = alu_usuario_id;
     
@@ -71,7 +73,6 @@ PACKAGE BODY ANTIPLAGIO AS
    end;
     begin     
       select tiempo_minimo into tiempo_min from docencia.relacion where docencia.relacion.relacion_id = param_relacion_id AND docencia.relacion.asignatura_asignatura_id = param_asignatura_id;
-      DBMS_OUTPUT.PUT_LINE(tiempo_min);
       exception when others then
  raise excepcion_no_tiempo_minimo;
     end;
@@ -84,10 +85,12 @@ PACKAGE BODY ANTIPLAGIO AS
     
       FOR calif IN alum_rel(var_userid) LOOP
       begin
-        dedic_tiempo_dias := dedic_tiempo_dias + extract(day from calif.fecha_entrega_correcto - calif.fecha_inicio); 
-        dedic_tiempo_horas := dedic_tiempo_horas + extract(hour from calif.fecha_entrega_correcto - calif.fecha_inicio);
-        dedic_tiempo_minutos := dedic_tiempo_minutos + extract(minute from calif.fecha_entrega_correcto - calif.fecha_inicio);
-        dedic_tiempo_segundos := dedic_tiempo_segundos + extract (second from calif.fecha_entrega_correcto - calif.fecha_inicio);
+
+        dedic_tiempo_dias := dedic_tiempo_dias + extract(day from calif.fecha_entrega_ultima - calif.fecha_inicio); 
+        dedic_tiempo_horas := dedic_tiempo_horas + extract(hour from calif.fecha_entrega_ultima - calif.fecha_inicio);
+        dedic_tiempo_minutos := dedic_tiempo_minutos + extract(minute from calif.fecha_entrega_ultima - calif.fecha_inicio);
+        dedic_tiempo_segundos := dedic_tiempo_segundos + extract (second from calif.fecha_entrega_ultima - calif.fecha_inicio);
+
       exception
       when others then 
       raise excepcion_rel_no_terminada;
