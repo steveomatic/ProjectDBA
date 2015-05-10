@@ -154,12 +154,13 @@ SELECT asignatura_id, relacion_relacion_id, SUM(NOTA) AS nota, usuario_usuario_i
 FROM calif_ejercicio
 GROUP BY asignatura_id, relacion_relacion_id, usuario_usuario_id;
 
-CREATE VIEW notas_alumnos AS
-SELECT asignatura.asignatura_id as AsignaturaID, asignatura.nombre as Asignatura, relacion_relacion_id AS Relacion, NOTA,alumno.alumno_id as alumnoID, alumno.nombre || ' ' || alumno.apellido1 || ' ' ||
+CREATE VIEW OR REPLACE notas_alumnos AS
+SELECT asignatura.nombre as Asignatura, relacion_relacion_id AS Relacion, NOTA, alumno.nombre || ' ' || alumno.apellido1 || ' ' ||
 alumno.apellido2 AS Nombre, alumno.dni, curso_academico, grupo, expediente, alumno.fecha_alta AS "Fecha de alta",
 alumno.fecha_nacimiento AS "Fecha de nacimiento"
 FROM Notas_alumnos_sin_datos, usuario, matricula, alumno, asignatura
 WHERE Notas_alumnos_sin_datos.usuario_usuario_id = usuario.usuario_id
+AND asignatura.asignatura_id=notas_alumnos_sin_datos.asignatura_id
 AND matricula.usuario_usuario_id = usuario.usuario_id
 AND matricula.alumno_alumno_id = alumno.alumno_id;
 
