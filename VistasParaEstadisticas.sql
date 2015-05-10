@@ -18,6 +18,7 @@ FROM notas_alu_por_tema, usuario, matricula, alumno, asignatura
 WHERE notas_alu_por_tema.usuario = usuario.usuario_id
 AND matricula.usuario_usuario_id = usuario.usuario_id
 AND matricula.alumno_alumno_id = alumno.alumno_id
+AND matricula.asignatura_asignatura_id = notas_alu_por_tema.asignatura_id
 AND asignatura.asignatura_id=notas_alu_por_tema.asignatura_id;
 
 
