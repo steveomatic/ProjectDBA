@@ -6,7 +6,7 @@ PACKAGE BODY ANTIPLAGIO AS
   respuesta_alu DOCENCIA.CALIF_EJERCICIO.RESPUESTA%TYPE;
   ha_copiado NUMBER; -- Almacenará 1 si se ha copiado
   CURSOR c_respuestas IS -- Todas las respuestas al ejercicio "ejercicio_id" excepto la del estudiante usuario_id
-    SELECT respuesta FROM calif_ejercicio
+    SELECT respuesta,usuario_usuario_id FROM calif_ejercicio
     WHERE usuario_usuario_id != usuario_id AND asignatura = asignatura_id AND ejercicio_ejercicio_id = ejercicio_id; 
   
   BEGIN  
@@ -16,7 +16,7 @@ PACKAGE BODY ANTIPLAGIO AS
     FOR respuesta IN c_respuestas LOOP
         -- Comparo la respuesta del alumno con las respuestas dadas por otros alumnos al mismo ejericio. Quito espacios y lo pongo en mayúsculas.
         IF UPPER(REPLACE(respuesta.respuesta, ' ')) = UPPER(REPLACE(respuesta_alu, ' ')) THEN 
-          dbms_output.put_line('Usuario: '||usuario_id||'. Es muy posible que se haya copiado.');
+          dbms_output.put_line('Usuario: '||usuario_id||'. Es muy posible que se haya copiado del usuario '||respuesta.usuario_usuario_id);
           ha_copiado := 1;
           EXIT;
         END IF;
@@ -170,4 +170,5 @@ PACKAGE BODY ANTIPLAGIO AS
     end if;
   end antiplagio_relacion_todas; 
 
-END ANTIPLAGIO;
+
+END ANTIPLAGIO; 

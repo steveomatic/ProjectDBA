@@ -139,9 +139,11 @@ procedure correccion_alu(cor_relacion_id in number , cor_ejercicio_id in number,
     ejercicio_ejercicio_id = cor_ejercicio_id;
     --aumentar el número de fallos del ejercicio
     
-    update ejercicio
-    set fallos = fallos+1
-    where ejercicio_id = cor_ejercicio_id;
+    IF SQL%ROWCOUNT != 0 THEN
+      update ejercicio
+      set fallos = fallos+1
+      where ejercicio_id = cor_ejercicio_id;
+    END IF;
   
   END IF;
   
@@ -168,9 +170,11 @@ procedure correccion_alu(cor_relacion_id in number , cor_ejercicio_id in number,
     ejercicio_ejercicio_id = cor_ejercicio_id;
     --aumentar el número de fallos del ejercicio
     
-    update ejercicio
-    set fallos = fallos+1
-    where ejercicio_id = cor_ejercicio_id;
+    IF SQL%ROWCOUNT != 0 THEN
+      update ejercicio
+      set fallos = fallos+1
+      where ejercicio_id = cor_ejercicio_id;
+    END IF;
   WHEN ERROR_NO_DATOS then 
     DBMS_OUTPUT.PUT_LINE('No se seleccionó nada.');
     update calif_ejercicio
@@ -184,9 +188,11 @@ procedure correccion_alu(cor_relacion_id in number , cor_ejercicio_id in number,
     ejercicio_ejercicio_id = cor_ejercicio_id;
     --aumentar el número de fallos del ejercicio
     
-    update ejercicio
-    set fallos = fallos+1
-    where ejercicio_id = cor_ejercicio_id;
+    IF SQL%ROWCOUNT != 0 THEN
+      update ejercicio
+      set fallos = fallos+1
+      where ejercicio_id = cor_ejercicio_id;
+    END IF;
   WHEN ERROR_COLUMNAS_DIF THEN 
     DBMS_OUTPUT.PUT_LINE('');
     update calif_ejercicio
@@ -200,9 +206,11 @@ procedure correccion_alu(cor_relacion_id in number , cor_ejercicio_id in number,
     ejercicio_ejercicio_id = cor_ejercicio_id;
     --aumentar el número de fallos del ejercicio
     
-    update ejercicio
-    set fallos = fallos+1
-    where ejercicio_id = cor_ejercicio_id;
+    IF SQL%ROWCOUNT != 0 THEN
+      update ejercicio
+      set fallos = fallos+1
+      where ejercicio_id = cor_ejercicio_id;
+    END IF;
   
   WHEN ERROR_TABLA_NO_EXISTE THEN 
     DBMS_OUTPUT.PUT_LINE('No existe la tabla');
@@ -217,9 +225,11 @@ procedure correccion_alu(cor_relacion_id in number , cor_ejercicio_id in number,
     ejercicio_ejercicio_id = cor_ejercicio_id;
     --aumentar el número de fallos del ejercicio
     
-    update ejercicio
-    set fallos = fallos+1
-    where ejercicio_id = cor_ejercicio_id;
+    IF SQL%ROWCOUNT != 0 THEN
+      update ejercicio
+      set fallos = fallos+1
+      where ejercicio_id = cor_ejercicio_id;
+    END IF;
     
   WHEN ERROR_DESCONOCIDO THEN 
     DBMS_OUTPUT.PUT_LINE('Error desconocido correccion');
@@ -234,9 +244,11 @@ procedure correccion_alu(cor_relacion_id in number , cor_ejercicio_id in number,
     ejercicio_ejercicio_id = cor_ejercicio_id;
     --aumentar el número de fallos del ejercicio
     
-    update ejercicio
-    set fallos = fallos+1
-    where ejercicio_id = cor_ejercicio_id;
+    IF SQL%ROWCOUNT != 0 THEN
+      update ejercicio
+      set fallos = fallos+1
+      where ejercicio_id = cor_ejercicio_id;
+    END IF;
   
   END correccion_alu;
   
@@ -298,7 +310,7 @@ procedure correccion_alu(cor_relacion_id in number , cor_ejercicio_id in number,
     
     
 --para cada relacion, visualiza cada pregunta. Si es la primera vez que se ve el ejercicio, se inserta la fecha de inicio (hoy)
-procedure ver_preguntas(ver_relacion_id in number, ver_asignatura_id in number) as
+    procedure ver_preguntas(ver_relacion_id in number, ver_asignatura_id in number) as
 
     
 
@@ -307,6 +319,7 @@ procedure ver_preguntas(ver_relacion_id in number, ver_asignatura_id in number) 
    ejercicio_enunciado ejercicio.enunciado%type;
    ejercicio_retribucion ejercicio.retribucion%type;
    ver_usuario_id INTEGER;
+   suma_filas NUMBER;
    
    CURSOR ejer_cur (par_usuario INTEGER) is -- el param. del cursor es el usuario id del que llama al procedure
    -- este cursor coge datos sobre los ejercicios de una relación
@@ -338,14 +351,22 @@ procedure ver_preguntas(ver_relacion_id in number, ver_asignatura_id in number) 
           dbms_output.put_line('ID= '||ejer_id || ' ' || ejercicio_enunciado || ' #Puntos=' ||ejercicio_retribucion);
           begin
           
-            insert into audit_ejer(usuario_id,ejercicio_id,fecha_inicio) -- Si es la primera vez que se ve el ejercicio, se inserta la fecha de inicio (hoy)
-            select ver_usuario_id,ejer_id,sysdate from dual
-              where not exists (
-                select 1 from audit_ejer
+            select count(*) into suma_filas from docencia.audit_ejer
                   where usuario_id = ver_usuario_id
                   and
                   ejer_id = ejercicio_id
-              );
+                  and
+                  ver_relacion_id = relacion_id
+                  and
+                  ver_asignatura_id = asignatura_id;
+            
+            IF suma_filas = 0 then
+              DBMS_OUTPUT.PUT_LINE('Primera vez visto.');      
+              insert into docencia.audit_ejer values(ver_usuario_id, ejer_id, ver_relacion_id, ver_asignatura_id, systimestamp, null, null); 
+            ELSE
+              DBMS_OUTPUT.PUT_LINE('Ya visto.');      
+            END IF;
+                     
             EXCEPTION WHEN OTHERS THEN 
               IF SQLCODE = -1031 then raise ERROR_PRIVS_INSUF;
               ELSE raise ERROR_DESCONOCIDO;
@@ -354,7 +375,7 @@ procedure ver_preguntas(ver_relacion_id in number, ver_asignatura_id in number) 
           
        END LOOP;
        CLOSE ejer_cur;
-       
+       commit; --si no, no insertaba.
        EXCEPTION
         when ERROR_PRIVS_INSUF then 
         DBMS_OUTPUT.put_line('Error: no se tienen privilegios suficientes');
@@ -375,7 +396,6 @@ procedure ver_preguntas(ver_relacion_id in number, ver_asignatura_id in number) 
            CLOSE ejer_cur;
         END IF;
 end ver_preguntas;
-
     
     
     

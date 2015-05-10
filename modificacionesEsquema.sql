@@ -7,7 +7,7 @@ FOREIGN KEY (USUARIO_USUARIO_ID)
 REFERENCES USUARIO(usuario_id)
 ON DELETE CASCADE;
 
-
+grant create sequence to docencia;
 
 --tiempo minimo va en minutos
 alter table relacion add tiempo_minimo number;
