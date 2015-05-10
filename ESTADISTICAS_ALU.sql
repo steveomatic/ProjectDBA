@@ -94,6 +94,7 @@ PACKAGE BODY ESTADISTICAS_ALU AS
   -------------------------------------------------------------------------------------------------------
   -------------------------------------------------------------------------------------------------------
   
+  -- Nos da la correlación de ej_ejercicio_id en la nota media de los estudiantes
 procedure CORR_EJERCICIO_NOTA(ej_ejercicio_id IN NUMBER) AS
   
   corr_ejer_notas FLOAT;
@@ -103,8 +104,11 @@ procedure CORR_EJERCICIO_NOTA(ej_ejercicio_id IN NUMBER) AS
   
   BEGIN
     BEGIN
-      select corr(media,nota) into corr_ejer_notas from (select media, nota from (select usuario_usuario_id usuario, sum(nota)/count(nota) media from docencia.calif_ejercicio group by usuario_usuario_id) t1
-      join (select distinct usuario_usuario_id, nota from calif_ejercicio where ejercicio_ejercicio_id = ej_ejercicio_id) t2 on t1.usuario = t2.usuario_usuario_id);
+      -- une el conjunto con las notas de cada alumno en el ejercicio dado con la media de cada estudiante
+      select corr(media,nota) into corr_ejer_notas from (select media, nota -- cogemos la correlación
+        from (select usuario_usuario_id usuario, sum(nota)/count(nota) media from docencia.calif_ejercicio group by usuario_usuario_id) t1 -- media de cada alu
+        join (select distinct usuario_usuario_id, nota from calif_ejercicio where ejercicio_ejercicio_id = ej_ejercicio_id) t2 -- nota de cada alu en el ejercicio dado (param)
+          on t1.usuario = t2.usuario_usuario_id); -- una la media del alumno con la nota en ese ejercicio
       EXCEPTION
         WHEN OTHERS THEN
         IF SQLCODE = -00942 then RAISE ERROR_TABLA_NO_EXISTE;
