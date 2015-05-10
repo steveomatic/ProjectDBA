@@ -212,7 +212,9 @@ AS "Puntos restantes para 10"
 from asignatura, Mis_notas_total_por_asignatura ;
 
 --6. Dar los permisos necesarios para que un alumno pueda ver los N alumnos que más puntos llevan acumulados. 
---Para ello se creará un procedimiento que creará una tabla temporal con esos datos. (Por ahora no hay que hacerlo)
+--Para ello se creará un procedimiento que creará una tabla temporal con esos datos.
+
+--RESUELTO EN MEJORES_ALUMNOS.SQL CON EL PROCEDURE N_MEJORES_ASIGNATURA
 
 ----------------------------------------------
 CREATE BITMAP INDEX grupo_idx ON matricula(grupo) ;
@@ -248,11 +250,13 @@ CREATE TABLE audit_ejer
   (
   usuario_id  NUMBER NOT NULL,
   ejercicio_id NUMBER NOT NULL,
+  relacion_id NUMBER NOT NULL,
+  asignatura_id NUMBER NOT NULL,
   fecha_inicio timestamp NOT NULL,
   fecha_entrega_ultima timestamp,
   fecha_entrega_correcto timestamp
   );
-  ALTER TABLE audit_ejer ADD CONSTRAINT USUARIO_UNIQUE UNIQUE (usuario_id, ejercicio_id);
+  ALTER TABLE audit_ejer ADD CONSTRAINT USUARIO_UNIQUE UNIQUE (usuario_id, ejercicio_id, relacion_id, asignatura_id);
 
 
 
