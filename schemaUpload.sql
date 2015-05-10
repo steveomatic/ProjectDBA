@@ -183,7 +183,8 @@ AND UPPER(usuario.nombre) = UPPER(user);
 CREATE OR REPLACE VIEW Mis_notas_de_ejercicios AS
 SELECT nota as Nota, relacion_relacion_id AS Relación, ejercicio_ejercicio_id AS Ejercicio
 FROM calif_ejercicio, usuario
-WHERE UPPER(usuario.nombre) = UPPER(user);
+WHERE UPPER(usuario.nombre) = UPPER(user)
+AND usuario_id=usuario_usuario_id;
 
 
 --4. Dar los permisos necesarios para que un alumno pueda ver los puntos totales que ha obtenido en cada relación
