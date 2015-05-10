@@ -149,12 +149,12 @@ GRANT INSERT, DELETE, ALTER on DOCENCIA.MATRICULA TO R_ADMINISTRATIVO;
 --(a partir de los cuales ya no se pueden pedir más relaciones). También podrá modificar el número de ejercicios de que consta una relación.
 
 -- Creo una vista auxiliar que me da las notas de las relaciones de todos los alumnos, pero no me da los datos de estos.
-CREATE VIEW Notas_alumnos_sin_datos AS
+CREATE OR REPLACE VIEW Notas_alumnos_sin_datos AS
 SELECT asignatura_id, relacion_relacion_id, SUM(NOTA) AS nota, usuario_usuario_id
 FROM calif_ejercicio
 GROUP BY asignatura_id, relacion_relacion_id, usuario_usuario_id;
 
-CREATE VIEW OR REPLACE notas_alumnos AS
+CREATE OR REPLACE VIEW notas_alumnos AS
 SELECT asignatura.nombre as Asignatura, relacion_relacion_id AS Relacion, NOTA, alumno.nombre || ' ' || alumno.apellido1 || ' ' ||
 alumno.apellido2 AS Nombre, alumno.dni, curso_academico, grupo, expediente, alumno.fecha_alta AS "Fecha de alta",
 alumno.fecha_nacimiento AS "Fecha de nacimiento"
