@@ -310,6 +310,7 @@ FROM Notas_alumnos_sin_datos, usuario, matricula, alumno, asignatura
 WHERE Notas_alumnos_sin_datos.usuario_usuario_id = usuario.usuario_id
 AND matricula.usuario_usuario_id = usuario.usuario_id
 AND matricula.alumno_alumno_id = alumno.alumno_id
+AND matricula.asignatura_asignatura_id = notas_alumnos_sin_datos.asignatura_id
 AND notas_alumnos_sin_datos.asignatura_id = asignatura.asignatura_id;
 
 
