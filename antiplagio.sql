@@ -9,7 +9,7 @@ PACKAGE BODY ANTIPLAGIO AS
     SELECT respuesta FROM calif_ejercicio
     WHERE usuario_usuario_id != usuario_id AND asignatura = asignatura_id AND ejercicio_ejercicio_id = ejercicio_id; 
   
-  BEGIN 
+  BEGIN  
     SELECT respuesta INTO respuesta_alu FROM calif_ejercicio -- Cogemos la respuesta del estudiante y la metemos en respuesta_alu
       WHERE usuario_usuario_id = usuario_id AND asignatura_id = asignatura AND relacion_relacion_id = relacion_id AND ejercicio_ejercicio_id = ejercicio_id; 
     ha_copiado := 0;
@@ -36,7 +36,7 @@ PACKAGE BODY ANTIPLAGIO AS
 ---------------------------------------------------------------------------------------------------------------------------
 
 
-  procedure antiplagio_relacion(param_asignatura_id IN NUMBER, param_relacion_id in number, alu_usuario_id in number) AS
+  procedure antiplagio_relacion(param_asignatura_id IN NUMBER, param_relacion_id in number) AS
     
    dedic_tiempo_dias number;
    dedic_tiempo_horas number;
@@ -45,16 +45,30 @@ PACKAGE BODY ANTIPLAGIO AS
    fecha_inicio_al docencia.audit_ejer.fecha_inicio%type;
    fecha_fin_al docencia.audit_ejer.fecha_entrega_correcto%type;
    
+   var_userid number;
+   
    suma_total_min number;
    tiempo_min number;
    excepcion_no_tiempo_minimo exception; 
    excepcion_rel_no_terminada exception;
-   CURSOR alum_rel is -- Nos da fecha de inicio, fecha de entrega, de cada ejercicio de la relacion, asignatura y alumnno dados
+   excepcion_no_alu           exception;
+   CURSOR alum_rel(alu_usuario_id number) is -- Nos da fecha de inicio, fecha de entrega, de cada ejercicio de la relacion, asignatura y alumnno dados
     select docencia.audit_ejer.fecha_inicio, docencia.audit_ejer.fecha_entrega_correcto 
     from docencia.audit_ejer 
     where docencia.audit_ejer.relacion_id = param_relacion_id AND docencia.audit_ejer.asignatura_id = param_asignatura_id AND docencia.audit_ejer.usuario_id = alu_usuario_id;
     
    BEGIN
+   begin
+   select usuario_usuario_id
+   into var_userid
+   from relacion
+   where
+   relacion_id = param_relacion_id
+   and asignatura_asignatura_id = param_asignatura_id;
+   exception when others
+   then
+   raise excepcion_no_alu;
+   end;
     begin     
       select tiempo_minimo into tiempo_min from docencia.relacion where docencia.relacion.relacion_id = param_relacion_id AND docencia.relacion.asignatura_asignatura_id = param_asignatura_id;
       DBMS_OUTPUT.PUT_LINE(tiempo_min);
@@ -68,7 +82,7 @@ PACKAGE BODY ANTIPLAGIO AS
     
     suma_total_min := 0;
     
-      FOR calif IN alum_rel LOOP
+      FOR calif IN alum_rel(var_userid) LOOP
       begin
         dedic_tiempo_dias := dedic_tiempo_dias + extract(day from calif.fecha_entrega_correcto - calif.fecha_inicio); 
         dedic_tiempo_horas := dedic_tiempo_horas + extract(hour from calif.fecha_entrega_correcto - calif.fecha_inicio);
@@ -98,11 +112,11 @@ PACKAGE BODY ANTIPLAGIO AS
   
   suma_total_min := dedic_tiempo_dias*24*60+
                     dedic_tiempo_horas*60+
-                    dedic_tiempo_minutos+
+                    dedic_tiempo_minutos+ 
                     dedic_tiempo_segundos/60;
   if suma_total_min <= tiempo_min
   then
-  dbms_output.put_line('Atencion: Usuario #'||alu_usuario_id||' ha completado la relación '||param_relacion_id|| ' en '||suma_total_min||' minuto/s.');
+  dbms_output.put_line('Atencion: Usuario #'||var_userid||' ha completado la relación '||param_relacion_id|| ' en '||suma_total_min||' minuto/s.');
   
   
   end if;
@@ -115,6 +129,9 @@ PACKAGE BODY ANTIPLAGIO AS
   when excepcion_rel_no_terminada
   then
   dbms_output.put_line('El alumno aun no ha acabado la relacion o no ha empezado.');
+  when excepcion_no_alu
+  then
+  dbms_output.put_line('No se ha encontrado alumno asociado a tal relacion');
   when others then
   dbms_output.put_line('Error desconocido');
     IF alum_rel%ISOPEN THEN 
@@ -132,13 +149,13 @@ PACKAGE BODY ANTIPLAGIO AS
   --Igual que la anterior pero muestra el antiplagio de todas las relaciones
   procedure antiplagio_relacion_todas as
   cursor rel_cur is
-  select relacion_id from relacion
+  select relacion_id,asignatura_asignatura_id from relacion
   ;
   
   begin
-   FOR calif IN rel_cur LOOP
+   FOR calif IN rel_cur LOOP 
       
-      antiplagio_relacion(calif.relacion_id);
+      antiplagio_relacion(calif.relacion_id,calif.asignatura_asignatura_id);
      
     END LOOP;
     exception
@@ -149,4 +166,4 @@ PACKAGE BODY ANTIPLAGIO AS
     end if;
   end antiplagio_relacion_todas; 
 
-END ANTIPLAGIO; 
+END ANTIPLAGIO;
