@@ -15,10 +15,10 @@ GRANT SELECT ON Mejores_alu_relacion TO R_PROFESOR;
 --------------------------------------------------------------------------------------------------------------------------
 
 -- Vista auxiliar
-CREATE VIEW Notas_alu_tema_sin_datos AS
+CREATE OR REPLACE VIEW Notas_alu_tema_sin_datos AS
 SELECT c.asignatura_id, r.tema, c.relacion_relacion_id, c.NOTA, c.usuario_usuario_id
 FROM calif_ejercicio c , relacion r
-WHERE c.relacion_relacion_id = c.relacion_relacion_id;
+WHERE c.relacion_relacion_id = r.relacion_id;
 
 -- Vista auxiliar
 CREATE VIEW notas_alu_por_tema AS
