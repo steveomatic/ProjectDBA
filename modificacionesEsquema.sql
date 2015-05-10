@@ -20,3 +20,7 @@ grant alter user to docencia;
 
 --PELIGROSO, pero hace falta para que pueda matar las sesiones
 grant alter system to docencia;
+
+
+--Para el alumno
+grant execute on PROC_ALU to R_ALUMNO;

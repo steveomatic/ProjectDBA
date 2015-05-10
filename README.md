@@ -15,6 +15,12 @@ Procedimiento para realizar un examen/relación.
 
 5) A parte el alumno cuenta de numerosas vistas y el profesor de vistas estadísticas para estudiar el rendimiento.
 
+******************************************************
+Procedimiento de nuevo alumno:
+
+1) El profesor en el paquete GEST_USUARIO puede crear un usuario o varios a la vez
+2) Una vez creados, les asigna relaciones en el paquete CORREC_EJER y a esas relaciones les asigna ejercicios
+3) Cuando estén todos listos, el alumno ejecuta sus procedimientos en PROC_ALU y empieza a trabajar
 
 [![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/HaritzPuerto/ProjectDBA?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
