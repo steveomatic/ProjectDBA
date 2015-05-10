@@ -84,13 +84,15 @@ PACKAGE BODY ANTIPLAGIO AS
     suma_total_min := 0;
     
       FOR calif IN alum_rel(var_userid) LOOP
-      begin
-
-        dedic_tiempo_dias := dedic_tiempo_dias + extract(day from calif.fecha_entrega_ultima - calif.fecha_inicio); 
-        dedic_tiempo_horas := dedic_tiempo_horas + extract(hour from calif.fecha_entrega_ultima - calif.fecha_inicio);
-        dedic_tiempo_minutos := dedic_tiempo_minutos + extract(minute from calif.fecha_entrega_ultima - calif.fecha_inicio);
-        dedic_tiempo_segundos := dedic_tiempo_segundos + extract (second from calif.fecha_entrega_ultima - calif.fecha_inicio);
-
+      BEGIN
+        IF calif.fecha_entrega_ultima IS NULL THEN
+          RAISE excepcion_rel_no_terminada;
+        ELSE
+          dedic_tiempo_dias := dedic_tiempo_dias + extract(day from calif.fecha_entrega_ultima - calif.fecha_inicio); 
+          dedic_tiempo_horas := dedic_tiempo_horas + extract(hour from calif.fecha_entrega_ultima - calif.fecha_inicio);
+          dedic_tiempo_minutos := dedic_tiempo_minutos + extract(minute from calif.fecha_entrega_ultima - calif.fecha_inicio);
+          dedic_tiempo_segundos := dedic_tiempo_segundos + extract (second from calif.fecha_entrega_ultima - calif.fecha_inicio);
+        END IF;
       exception
       when others then 
       raise excepcion_rel_no_terminada;
@@ -141,7 +143,6 @@ PACKAGE BODY ANTIPLAGIO AS
     CLOSE alum_rel;
   END IF;
     end antiplagio_relacion;
-
 ---------------------------------------------------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------------------------------------------------
