@@ -158,7 +158,7 @@ PACKAGE BODY ANTIPLAGIO AS
   begin
    FOR calif IN rel_cur LOOP 
       
-      antiplagio_relacion(calif.relacion_id,calif.asignatura_asignatura_id);
+      antiplagio_relacion(calif.asignatura_asignatura_id, calif.relacion_id);
      
     END LOOP;
     exception
