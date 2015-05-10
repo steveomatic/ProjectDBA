@@ -227,7 +227,10 @@ CREATE OR REPLACE VIEW Mis_puntos_restantes AS
 select asignatura, asignatura.min_puntos - mis_notas_total_por_asignatura.nota
 AS "Puntos restantes para aprobar", asignatura.max_puntos-nota
 AS "Puntos restantes para 10"
-from asignatura, Mis_notas_total_por_asignatura ;
+from asignatura, Mis_notas_total_por_asignatura
+where nombre=asignatura;
+
+
 GRANT SELECT ON Mis_puntos_restantes TO R_alumno;
 --6. Dar los permisos necesarios para que un alumno pueda ver los N alumnos que más puntos llevan acumulados. 
 --Para ello se creará un procedimiento que creará una tabla temporal con esos datos.
