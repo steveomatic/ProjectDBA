@@ -88,6 +88,45 @@ PACKAGE BODY ESTADISTICAS_ALU AS
     DBMS_OUTPUT.PUT_LINE('Error, no se han podido obtener los mejores alumnos');
   
   END N_MEJORES_ASIGNATURA;
+  
+  -------------------------------------------------------------------------------------------------------
+  -------------------------------------------------------------------------------------------------------
+  -------------------------------------------------------------------------------------------------------
+  -------------------------------------------------------------------------------------------------------
+  
+  -- Nos da la correlación de ej_ejercicio_id en la nota media de los estudiantes
+procedure CORR_EJERCICIO_NOTA(ej_ejercicio_id IN NUMBER) AS
+  
+  corr_ejer_notas FLOAT;
+  ERROR_TABLA_NO_EXISTE exception;
+  ERROR_NO_DATOS exception;
+  ERROR_DESCONOCIDO exception;
+  
+  BEGIN
+    BEGIN
+      -- une el conjunto con las notas de cada alumno en el ejercicio dado con la media de cada estudiante
+      select corr(media,nota) into corr_ejer_notas from (select media, nota -- cogemos la correlación
+        from (select usuario_usuario_id usuario, sum(nota)/count(nota) media from docencia.calif_ejercicio group by usuario_usuario_id) t1 -- media de cada alu
+        join (select distinct usuario_usuario_id, nota from calif_ejercicio where ejercicio_ejercicio_id = ej_ejercicio_id) t2 -- nota de cada alu en el ejercicio dado (param)
+          on t1.usuario = t2.usuario_usuario_id); -- une la media del alumno con la nota en ese ejercicio
+      EXCEPTION
+        WHEN OTHERS THEN
+        IF SQLCODE = -00942 then RAISE ERROR_TABLA_NO_EXISTE;
+        ELSIF SQLCODE = -01403 then RAISE ERROR_NO_DATOS;
+        ELSE RAISE ERROR_DESCONOCIDO;
+        END IF;
+    END;
+    
+    IF corr_ejer_notas is null THEN
+      DBMS_OUTPUT.PUT_LINE('No existen datos para correlar, o bien estos no presentan dependencia.');
+    ELSE
+      DBMS_OUTPUT.PUT_LINE('Correlación entre la nota media de los usuarios y el ejercicio '||ej_ejercicio_id||':  '||corr_ejer_notas);
+    END IF;
+  EXCEPTION
+  WHEN ERROR_TABLA_NO_EXISTE THEN DBMS_OUTPUT.PUT_LINE('No existe la tabla o ejercicio.');
+  WHEN ERROR_NO_DATOS THEN DBMS_OUTPUT.PUT_LINE('No existe el ejercicio.');
+  WHEN ERROR_DESCONOCIDO THEN DBMS_OUTPUT.PUT_LINE('Error desconocido.');
+  END CORR_EJERCICIO_NOTA;
 
 
 END ESTADISTICAS_ALU;
