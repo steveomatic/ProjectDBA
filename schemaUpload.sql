@@ -410,5 +410,7 @@ INSERT INTO calif_ejercicio(nota,usuario_usuario_id,relacion_relacion_id,ejercic
 VALUES(0,3,6,4,2,'select * from countries
 where country_name like ''S%''');
 
+CREATE OR REPLACE VIEW std_dev_nota_tema AS
+SELECT asignatura_id, usuario, tema, nota, STDDEV(nota) OVER (ORDER BY nota) "StdDev" from notas_alu_por_tema ORDER BY tema;
 
 
