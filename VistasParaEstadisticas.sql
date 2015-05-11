@@ -49,3 +49,14 @@ AND matricula.alumno_alumno_id = alumno.alumno_id
 AND matricula.asignatura_asignatura_id = notas_alumnos_sin_datos.asignatura_id
 AND notas_alumnos_sin_datos.asignatura_id = asignatura.asignatura_id;
 
+
+GRANT SELECT ON Mejores_alu_tema TO R_PROFESOR;
+
+create or replace view nota_alu_asig_procedure as 
+select Asignatura, sum(NOTA) as sumNota,Nombre
+from notas_alumnos
+group by Relacion,NOMBRE,Asignatura;
+
+
+grant select on nota_alu_asig_procedure to R_PROFESOR;
+
