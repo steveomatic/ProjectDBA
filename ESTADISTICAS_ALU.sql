@@ -50,12 +50,12 @@ PACKAGE BODY ESTADISTICAS_ALU AS
   
  
   
-  cursor med_cur(nombre_alu varchar2,asignatura_nombre varchar2) is
-  select mediana
-  from mediana_alu_relacion
-  where nombre = nombre_alu
+  cursor sum_cur(nombre_alu varchar2,asignatura_nombre varchar2) is
+  select sumNota
+  from nota_alu_asig_procedure
+  where NOMBRE = nombre_alu
   and
-  asignatura= asignatura_nombre
+  ASIGNATURA= asignatura_nombre
   ; 
   cursor rel_cur is
   select relacion,nota,nombre 
@@ -103,11 +103,11 @@ demasiadas_tuplas_exception exception;
         CLOSE rel_cur;
        END IF;
        
-  FOR tupla2 in med_cur(v_nombre_alu,v_nombre_asignatura) LOOP
-      dbms_output.put_line('*****   Mediana Asignatura: '||v_nombre_asignatura||': '||tupla2.mediana||'     *****');
+  FOR tupla2 in sum_cur(v_nombre_alu,v_nombre_asignatura) LOOP
+      dbms_output.put_line('*****   Suma Acumulativa de Asignatura: '||v_nombre_asignatura||': '||tupla2.sumNota||'     *****');
       end loop;
-       IF med_cur%ISOPEN = TRUE THEN 
-        CLOSE med_cur;
+       IF sum_cur%ISOPEN = TRUE THEN 
+        CLOSE sum_cur;
        END IF;
       
        

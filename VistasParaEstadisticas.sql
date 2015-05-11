@@ -50,3 +50,11 @@ select * from mediana_alu_tema
 ORDER BY mediana asc;
 
 GRANT SELECT ON Mejores_alu_tema TO R_PROFESOR;
+
+create or replace view nota_alu_asig_procedure as 
+select Asignatura, sum(NOTA) as sumNota,Nombre
+from notas_alumnos
+group by Relacion,NOMBRE,Asignatura;
+
+
+grant select on nota_alu_asig_procedure to R_PROFESOR;
