@@ -179,6 +179,7 @@ PACKAGE BODY CORREC_EJER AS
     begin
       begin
         insert into docencia.calif_ejercicio(nota,usuario_usuario_id,relacion_relacion_id,ejercicio_ejercicio_id,asignatura_id,respuesta) values(0,usuario_id,relacion_id,ejercicio_id,asignatura_id,null);
+        insert into docencia.audit_ejer values(usuario_id, ejercicio_id, relacion_id, asignatura_id, systimestamp, null, null);
         DBMS_OUTPUT.put_line('Asignación satisfactoria');
       EXCEPTION WHEN OTHERS THEN 
         IF SQLCODE = -1031 then raise ERROR_PRIVS_INSUF;
