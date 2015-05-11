@@ -314,6 +314,18 @@ AND matricula.asignatura_asignatura_id = notas_alumnos_sin_datos.asignatura_id
 AND notas_alumnos_sin_datos.asignatura_id = asignatura.asignatura_id;
 
 
+
+create or replace view nota_alu_asig_procedure as 
+select Asignatura, sum(NOTA) as sumNota,Nombre
+from notas_alumnos
+group by Relacion,NOMBRE,Asignatura;
+
+
+-------------------------------------------------------------------
+-------------------------------------------------------------------
+
+
+
 insert into alumno(alumno_id,dni,nombre,apellido1,apellido2,expediente,fecha_alta,fecha_nacimiento) values(1,'999999X','Robert','Liam','Curtis','00001',sysdate,sysdate-20);
 insert into alumno(alumno_id,dni,nombre,apellido1,apellido2,expediente,fecha_alta,fecha_nacimiento) values(2,'787643X','Luke','Sky','Walker','00012',sysdate,sysdate-21);
 insert into alumno(alumno_id,dni,nombre,apellido1,apellido2,expediente,fecha_alta,fecha_nacimiento) values(3,'123445X','Jack','Kerouac',NULL,'00013',sysdate,sysdate-60);
