@@ -35,7 +35,10 @@ PACKAGE BODY ESTADISTICAS_ALU AS
        dbms_output.put_line('Error, no se ha podido encontrar los ejercicios');
   END MAS_FALLOS;
 
-
+  ----------------------------------------------------------------------------------------------------------------------------
+  ----------------------------------------------------------------------------------------------------------------------------
+  ----------------------------------------------------------------------------------------------------------------------------
+  ----------------------------------------------------------------------------------------------------------------------------
   
   
  
@@ -127,14 +130,34 @@ demasiadas_tuplas_exception exception;
       WHEN OTHERS THEN dbms_output.put_line('Error desconocido.');
   end ANALISIS_ALU_ASIGNATURA;
 
+
+  ----------------------------------------------------------------------------------------------------------------------------
+  ----------------------------------------------------------------------------------------------------------------------------
+  ----------------------------------------------------------------------------------------------------------------------------
+  ----------------------------------------------------------------------------------------------------------------------------
+
   PROCEDURE ANALISIS_ALU(alumno_id number) as
-  
+  v_nombre_alu notas_alumnos.nombre%type;
   cursor asignaturas_cur is
   select asignatura_asignatura_id
   from matricula
   where alumno_alumno_id = alumno_id;
   
+  no_datos_exception exception;
+  
   begin
+  begin
+  select max(nombre)
+  into v_nombre_alu
+  from notas_alumnos_para_procedure where alumnoid = alumno_id;
+  exception
+  when NO_DATA_FOUND then raise no_datos_exception;
+  end;
+  
+  if v_nombre_alu is null then raise no_datos_exception;
+  end if;
+  
+  
     FOR tupla in asignaturas_cur LOOP
       ANALISIS_ALU_ASIGNATURA(alumno_id,tupla.asignatura_asignatura_id);
       end loop;
@@ -142,7 +165,8 @@ demasiadas_tuplas_exception exception;
         CLOSE asignaturas_cur;
        END IF;
        EXCEPTION
-      WHEN OTHERS THEN dbms_output.put_line('Error desconocido.');
+      WHEN no_datos_exception THEN dbms_output.put_line('Alumno no encontrado.');
+      when others then dbms_output.put_line('Error desconocido');
   end ANALISIS_ALU;
  
   ----------------------------------------------------------------------------------------------------------------------------
