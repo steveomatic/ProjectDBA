@@ -410,13 +410,13 @@ PROCEDURE BORRAR_USUARIO(usuario IN VARCHAR2) IS
 
 
   --Mata la sesión de usuario. Si no la tiene iniciada, nos dice que ese usuario no tiene iniciada la sesión
-  --Hemos creado un sinónimo público para V$session llamado v_$session y hemos dado permiso de select a él a R_profesor y docencia.
+  --Se utiliza el sinónimo de v$session SESIONES que el profesor ha creado en Olimpia
   PROCEDURE MATAR_SESION (usuario IN VARCHAR2) IS
   
   --Declaramos una variable que va a almacenar el SID de la sesión del usuario
-  VAR_SID v_$session.sid%TYPE;
+  VAR_SID SESIONES.sid%TYPE;
   --Declaramos una variable que va a almacenar el SERIAL de la sesión del usuario
-  VAR_SERIAL# v_$session.serial#%TYPE;
+  VAR_SERIAL# SESIONES.serial#%TYPE;
 
   ERROR_USUARIO_NO_EXISTE exception;  --El usuario cuya sesión quieren que matemos no existe
   ERROR_DESCONOCIDO exception;        --Otro error
@@ -429,8 +429,8 @@ PROCEDURE BORRAR_USUARIO(usuario IN VARCHAR2) IS
 
       --Extraemos el SID y el SERIAL de la sesión del usuario
       --Son los valores que necesitamos para llamar a ALTER SYSTEM KILL SESSION
-      SELECT sid into VAR_SID from v_$session where username = usuario;
-      SELECT serial# into VAR_SERIAL# from v_$session where username = usuario;
+      SELECT sid into VAR_SID from SESIONES where username = usuario;
+      SELECT serial# into VAR_SERIAL# from SESIONES where username = usuario;
 
       --Excepciones del SELECT
       EXCEPTION
