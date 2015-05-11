@@ -38,6 +38,7 @@ PACKAGE BODY ESTADISTICAS_ALU AS
 
   
   
+ 
   --Da un informe completo del alumno por asignatura
    --Da un informe completo del alumno por asignatura
   PROCEDURE ANALISIS_ALU_ASIGNATURA(alumno_id number, asignatura_id number) as
@@ -80,6 +81,9 @@ demasiadas_tuplas_exception exception;
   when TOO_MANY_ROWS then raise demasiadas_tuplas_exception;
   end;
   
+  if v_nombre_alu is null then raise no_datos_exception;
+  end if;
+  
   begin
   select max(asignatura)
   into v_nombre_asignatura
@@ -89,6 +93,10 @@ demasiadas_tuplas_exception exception;
   when NO_DATA_FOUND then raise no_datos_exception;
   when TOO_MANY_ROWS then raise demasiadas_tuplas_exception;
   end;
+  
+   if v_nombre_asignatura is null then raise no_datos_exception;
+  end if;
+  
   dbms_output.put_line('');
   dbms_output.put_line('***************  '||v_nombre_alu ||' en la asignatura '||v_nombre_asignatura||'  ***************');
   dbms_output.put_line('');
@@ -105,7 +113,7 @@ demasiadas_tuplas_exception exception;
        END IF;
        
   FOR tupla2 in sum_cur(v_nombre_alu,v_nombre_asignatura) LOOP
-      dbms_output.put_line('*****   Suma Acumulativa de Asignatura: '||v_nombre_asignatura||': '||tupla2.sumNota||'     *****');
+      dbms_output.put_line('*****   Suma Acumulativa Asignatura: '||v_nombre_asignatura||': '||tupla2.sumNota||'     *****');
       end loop;
        IF sum_cur%ISOPEN = TRUE THEN 
         CLOSE sum_cur;
