@@ -11,7 +11,7 @@ CREATE OR REPLACE PACKAGE ANTIPLAGIO AS
   PROCEDURE antiplagio_relacion_todas;
   
 END ANTIPLAGIO;
-
+/
 
 
 CREATE OR REPLACE PACKAGE CORREC_EJER AS 
@@ -23,7 +23,7 @@ CREATE OR REPLACE PACKAGE CORREC_EJER AS
   PROCEDURE crear_relacion(usuario_id in number, asignatura_asignatura_id in number, tema in number);
   
 END CORREC_EJER;
-
+/
 
 
 CREATE OR REPLACE PACKAGE ESTADISTICAS_ALU AS 
@@ -36,7 +36,7 @@ CREATE OR REPLACE PACKAGE ESTADISTICAS_ALU AS
   PROCEDURE CORR_EJERCICIO_NOTA(ej_ejercicio_id IN NUMBER);
   
 END ESTADISTICAS_ALU;
-
+/
 
 
 CREATE OR REPLACE PACKAGE GEST_USUARIO AS 
@@ -52,7 +52,7 @@ CREATE OR REPLACE PACKAGE GEST_USUARIO AS
   PROCEDURE MATAR_SESION (usuario IN VARCHAR2);
   
 END GEST_USUARIO;
-
+/
 
 
 CREATE OR REPLACE PACKAGE PROC_ALU AS 
@@ -62,7 +62,7 @@ CREATE OR REPLACE PACKAGE PROC_ALU AS
   PROCEDURE ver_preguntas(ver_relacion_id in number, ver_asignatura_id in number);
   
 END PROC_ALU;
-
+/
 
 
 
@@ -263,7 +263,7 @@ PACKAGE BODY ANTIPLAGIO AS
 
 
 END ANTIPLAGIO; 
-
+/
 
 
 ---------------------------------------------------------------------------------------------------------------------------
@@ -524,7 +524,7 @@ PROCEDURE crear_relacion(usuario_id in number, asignatura_asignatura_id in numbe
   end crear_relacion;
 
 END CORREC_EJER;
-
+/
 
 
 
@@ -877,7 +877,7 @@ PROCEDURE CORR_EJERCICIO_NOTA(ej_ejercicio_id IN NUMBER) AS
 
 
 END ESTADISTICAS_ALU;
-
+/
 
 
 
@@ -1349,7 +1349,7 @@ PROCEDURE BORRAR_USUARIO(usuario IN VARCHAR2) IS
   END MATAR_SESION;
 
 END GEST_USUARIO;
-
+/
 
 
 
@@ -1764,7 +1764,7 @@ PROCEDURE correccion_alu(cor_relacion_id in number , cor_ejercicio_id in number,
  end ver_preguntas;
     
 END PROC_ALU;
-
+/
 
 
 
