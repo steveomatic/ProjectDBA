@@ -177,7 +177,7 @@ demasiadas_tuplas_exception exception;
 PROCEDURE DEDICACION_ALU_RELACION(alu_usuario_id IN NUMBER, rel_relacion_id IN NUMBER, asignaturaID IN NUMBER) AS
 
   
-  dedic_tiempo_dias number;
+  dedic_tiempo_dias number; 
   dedic_tiempo_horas number;
   dedic_tiempo_minutos number;
   dedic_tiempo_segundos number;
@@ -186,7 +186,7 @@ PROCEDURE DEDICACION_ALU_RELACION(alu_usuario_id IN NUMBER, rel_relacion_id IN N
   ER_NO_EXISTE_USER exception;
   ER_NO_EXISTE_REL exception;
   existe_user_rel number;
-      
+       
     CURSOR alum_rel is -- Nos da fecha de inicio, fecha de entrega, de cada ejercicio de la relacion, asignatura y alumnno dados
     select audit_ejer.fecha_inicio, audit_ejer.fecha_entrega_ultima 
     from audit_ejer 
@@ -208,10 +208,16 @@ PROCEDURE DEDICACION_ALU_RELACION(alu_usuario_id IN NUMBER, rel_relacion_id IN N
   END;
     
     FOR calif IN alum_rel LOOP
+      if calif.fecha_entrega_ultima is not null then
+      
       dedic_tiempo_dias := dedic_tiempo_dias + extract(day from (calif.fecha_entrega_ultima - calif.fecha_inicio)); 
+    
       dedic_tiempo_horas := dedic_tiempo_horas + extract(hour from (calif.fecha_entrega_ultima - calif.fecha_inicio));
+  
       dedic_tiempo_minutos := dedic_tiempo_minutos + extract(minute from (calif.fecha_entrega_ultima - calif.fecha_inicio));
       dedic_tiempo_segundos := dedic_tiempo_segundos + extract (second from (calif.fecha_entrega_ultima - calif.fecha_inicio));
+        end if;
+     
     END LOOP;
     /*
     OPEN alum_rel;
