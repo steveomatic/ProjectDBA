@@ -174,7 +174,7 @@ demasiadas_tuplas_exception exception;
   ----------------------------------------------------------------------------------------------------------------------------
   ----------------------------------------------------------------------------------------------------------------------------
  
-ROCEDURE DEDICACION_ALU_RELACION(alu_usuario_id IN NUMBER, rel_relacion_id IN NUMBER, asignaturaID IN NUMBER) AS
+PROCEDURE DEDICACION_ALU_RELACION(alu_usuario_id IN NUMBER, rel_relacion_id IN NUMBER, asignaturaID IN NUMBER) AS
 
   
   dedic_tiempo_dias number;
