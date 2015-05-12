@@ -477,6 +477,25 @@ SELECT asignatura_id, usuario, tema, nota, STDDEV(nota) OVER (ORDER BY nota) "St
 ------------------------------------------------------------------
 ------------------------------------------------------------------
 
+
+
+------------------------------------------------------------------
+------------------------------------------------------------------
+-- Paquete ANTIPLAGIO
+--
+-- Paquete dedicado a estudiar la posibilidad de plagio en relaciones y examenes
+--
+--
+-- SEMANTICO: Dada una relacion asignada a un alumno, estudia la posibilidad de haberse copiado un ejercicio de otro alumno
+--
+-- antiplagio_relacion: Comprueba el tiempo minimo que el alumno ha tardado en hacer una relacion
+--
+-- antiplagio_relacion_todas: Comprueba el tiempo que se ha tardado en hacer todas las relaciones de una asignatura
+--
+--
+------------------------------------------------------------------
+------------------------------------------------------------------
+
 CREATE OR REPLACE PACKAGE ANTIPLAGIO AS 
 
   PROCEDURE semantico(usuario_id NUMBER, asignatura NUMBER, relacion_id NUMBER, ejercicio_id NUMBER);
@@ -486,6 +505,24 @@ CREATE OR REPLACE PACKAGE ANTIPLAGIO AS
 END ANTIPLAGIO;
 /
 
+------------------------------------------------------------------
+------------------------------------------------------------------
+-- Paquete CORREC_EJER
+--
+-- Paquete dedicado a la correccion y creacion de ejercicios para el profesorado
+--
+--
+-- CORRECCION: Realiza la correccion de un ejercicio
+--(El ejercicio al enviarse se corrije de forma auto, recomendado usar solo para una segunda correccion)
+--
+-- Asignacion_ejer: asigna un ejercicio a una relacion a un alumno de una asignatura
+--
+-- crear_ejer: Crea un nuevo ejercicio
+--
+-- crear_relacion: Crea una nueva relacion sin ejercicios asignados
+--
+------------------------------------------------------------------
+------------------------------------------------------------------
 
 CREATE OR REPLACE PACKAGE CORREC_EJER AS 
 
@@ -498,7 +535,26 @@ CREATE OR REPLACE PACKAGE CORREC_EJER AS
 END CORREC_EJER;
 /
 
-
+------------------------------------------------------------------
+------------------------------------------------------------------
+-- Paquete ESTADISTICAS ALU
+--
+-- Dedicado al analisis a posteriori para el profesorado
+--
+--
+-- MAS_FALLOS: muestra el ejercicio con mas fallos cometidos
+--
+-- ANALISIS_ALU_ASIGNATURA: dada una asignatura, muestra un informe de un alumno
+--
+-- ANALISIS_ALU: Muestra un informe completo de un alumno
+--
+-- DEDICACION_ALU_RELACION: Tiempo deicado de un usuario a una relacion
+--
+-- N_MEJORES_ASIGNATURA: Muestra los N mejores alumnos de una asignatura
+--
+-- CORR_EJERCICIO_NOTA: Correlación entre un ejercicio y la nota media 
+------------------------------------------------------------------
+------------------------------------------------------------------
 CREATE OR REPLACE PACKAGE ESTADISTICAS_ALU AS 
 
   PROCEDURE MAS_FALLOS;
@@ -510,7 +566,32 @@ CREATE OR REPLACE PACKAGE ESTADISTICAS_ALU AS
   
 END ESTADISTICAS_ALU;
 /
-
+------------------------------------------------------------------
+------------------------------------------------------------------
+-- Paquete GEST_USUARIO
+--
+-- Paquete dedicado a creacion/eliminacion/bloqueo de cuentas de usuarios
+--
+--
+--  CREAR_USUARIO: Crea un usuario con user/pass
+--
+--  CREAR_USUARIOS: crea n usuarios
+--
+--  BORRAR_USUARIO: Borra un usuario identificado con user dado
+--
+--  BORRAR_TODOS_USUARIOS: borra todos los usuarios de alumnos
+--
+--  BLOQUEAR USUARIO: Bloquea un usuario
+--
+--  BLOQUEAR_TODOS_USUARIOS: Bloquea a todos los usuarios
+--
+--  DESBLOQUEAR_USUARIO: Desbloquea a un usuario
+--
+--  DESBLOQUEAR_TODOS_USUARIOS: Desbloquea todos los usuarios
+--
+--  MATAR_SESION: Mata la sesion de un usuario dado
+------------------------------------------------------------------
+------------------------------------------------------------------
 
 CREATE OR REPLACE PACKAGE GEST_USUARIO AS 
 
@@ -526,7 +607,22 @@ CREATE OR REPLACE PACKAGE GEST_USUARIO AS
   
 END GEST_USUARIO;
 /
-
+------------------------------------------------------------------
+------------------------------------------------------------------
+-- Paquete PROC_ALU
+--
+-- Paquete dedicado al alumno, en este se encuentran procedimientos para el alumno
+--
+--
+-- Correccion_alu: Corrige un ejercicio de una asignatura de una relacion dada.
+--
+-- responder: Responde a la pregunta de un ejercicio de una relacion ( Al responder se modifica la tabla audit_ejercicios)
+--
+-- ver_preguntas: Se visualiza la relacion o examen (La primera visualizacion es el valor de tiempo de comienzo del examen)
+--
+--
+------------------------------------------------------------------
+------------------------------------------------------------------
 
 CREATE OR REPLACE PACKAGE PROC_ALU AS 
 
