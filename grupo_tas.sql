@@ -988,7 +988,7 @@ PACKAGE BODY CORREC_EJER AS
   ---------------------------------------------------------------------------------------------------------------------------
   ---------------------------------------------------------------------------------------------------------------------------
   
-  
+  --Pone un cero en el campo de nota del ejercicio de la relacion
  PROCEDURE poner_cero(cor_usuario_id in number,cor_relacion_id in number , cor_ejercicio_id in number, cor_asignatura_id in number) AS   
   BEGIN
     update calif_ejercicio
@@ -1039,7 +1039,7 @@ PACKAGE BODY CORREC_EJER AS
   ---------------------------------------------------------------------------------------------------------------------------
   ---------------------------------------------------------------------------------------------------------------------------
       
-
+  -- Crea un ejercicio con enunciado , tema etc.
   PROCEDURE crear_ejer(enunciado in varchar2,tema number,solucion in varchar2,retribucion in varchar2,palabras_clave in varchar2)as
  
   ERROR_PRIVS_INSUF exception;
@@ -1065,7 +1065,7 @@ PACKAGE BODY CORREC_EJER AS
   ---------------------------------------------------------------------------------------------------------------------------
   ---------------------------------------------------------------------------------------------------------------------------
 
-
+--Crea una relacion para una asignatura y la asigna a un usuario con su id
 PROCEDURE crear_relacion(usuario_id in number, asignatura_asignatura_id in number, tema in number) as
   ERROR_PRIVS_INSUF exception;
   ERROR_DESCONOCIDO exception;
@@ -1105,6 +1105,8 @@ END CORREC_EJER;
 
 CREATE OR REPLACE 
 PACKAGE BODY ESTADISTICAS_ALU AS
+
+  -- Muestra los ejercicios que han tenido el maximo numero de fallos
 
    PROCEDURE MAS_FALLOS AS
    ejer_id ejercicio.ejercicio_id%type;
@@ -1241,6 +1243,7 @@ demasiadas_tuplas_exception exception;
 
   PROCEDURE ANALISIS_ALU(alumno_id number) as
   v_nombre_alu notas_alumnos.nombre%type;
+  -- cursor para hallar todas sus asignaturas
   cursor asignaturas_cur is
   select asignatura_asignatura_id
   from matricula
@@ -1275,7 +1278,7 @@ demasiadas_tuplas_exception exception;
 
   ----------------------------------------------------------------------------------------------------------------------------
   ----------------------------------------------------------------------------------------------------------------------------
- 
+ -- Tiempo dedicado a una relacion por el usuario
 
 PROCEDURE DEDICACION_ALU_RELACION(alu_usuario_id IN NUMBER, rel_relacion_id IN NUMBER) AS
 
@@ -2356,6 +2359,8 @@ END PROC_ALU;
 ------------------------------------------------------------------
 ------------------------------------------------------------------
 
+--Tras ver los ejercicios de una relacion, el usuario introduce una respuesta al ejercicio
+-- Al meter la respuesta, el trigger se disparara haciendo su labor de auditoria.
 
 
 CREATE OR REPLACE TRIGGER TR_ACCESO_EJERCICIO 
