@@ -235,7 +235,7 @@ where nombre=asignatura;
 --6. Dar los permisos necesarios para que un alumno pueda ver los N alumnos que más puntos llevan acumulados. 
 --Para ello se creará un procedimiento que creará una tabla temporal con esos datos.
 
---RESUELTO EN MEJORES_ALUMNOS.SQL CON EL PROCEDURE N_MEJORES_ASIGNATURA
+--RESUELTO EN EL PROCEDURE N_MEJORES_ASIGNATURA
 
 ----------------------------------------------
 CREATE BITMAP INDEX grupo_idx ON matricula(grupo) ;
@@ -267,6 +267,7 @@ ON DELETE CASCADE;
 --tiempo minimo va en minutos
 alter table relacion add tiempo_minimo number;
 
+--Tabla de auditoria
 CREATE TABLE audit_ejer
   (
   usuario_id  NUMBER NOT NULL,
