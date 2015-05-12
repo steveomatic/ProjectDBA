@@ -430,12 +430,6 @@ insert into relacion(relacion_id,tema,usuario_usuario_id,asignatura_asignatura_i
 insert into relacion(relacion_id,tema,usuario_usuario_id,asignatura_asignatura_id,tiempo_minimo) values(5,2,2,1,7);
 insert into relacion(relacion_id,tema,usuario_usuario_id,asignatura_asignatura_id,tiempo_minimo) values(6,2,3,2,3);
 
---cada usuario ahora tiene una relacion, ahora asignamos los ejercicios con calif_ejercicio
-
-
---cuando el usuario responda, se actualizara a otra cosa que null y 
---cuando acabe el tiempo, el profesor ejecutara 
---el procedimiento de correccion
 
 INSERT INTO calif_ejercicio(nota,usuario_usuario_id,relacion_relacion_id,ejercicio_ejercicio_id,asignatura_id,respuesta) 
 VALUES(0,1,4,1,1,'select sysdate from dual');
