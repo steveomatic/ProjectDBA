@@ -713,10 +713,10 @@ demasiadas_tuplas_exception exception;
   ----------------------------------------------------------------------------------------------------------------------------
  
 
-PROCEDURE DEDICACION_ALU_RELACION(alu_usuario_id IN NUMBER, rel_relacion_id IN NUMBER) AS
+PROCEDURE DEDICACION_ALU_RELACION(alu_usuario_id IN NUMBER, rel_relacion_id IN NUMBER, asignaturaID IN NUMBER) AS
 
   
-  dedic_tiempo_dias number;
+  dedic_tiempo_dias number; 
   dedic_tiempo_horas number;
   dedic_tiempo_minutos number;
   dedic_tiempo_segundos number;
@@ -725,14 +725,12 @@ PROCEDURE DEDICACION_ALU_RELACION(alu_usuario_id IN NUMBER, rel_relacion_id IN N
   ER_NO_EXISTE_USER exception;
   ER_NO_EXISTE_REL exception;
   existe_user_rel number;
-  
-  CURSOR alum_rel is
-    select audit_ejer.fecha_inicio, audit_ejer.fecha_entrega_correcto from audit_ejer
-    inner join 
-    (select calif_ejercicio.ejercicio_ejercicio_id, calif_ejercicio.relacion_relacion_id 
-    from calif_ejercicio where calif_ejercicio.usuario_usuario_id = alu_usuario_id and calif_ejercicio.relacion_relacion_id = rel_relacion_id) t2 
-    on audit_ejer.ejercicio_id = t2.ejercicio_ejercicio_id 
-    where audit_ejer.usuario_id = alu_usuario_id and audit_ejer.fecha_entrega_correcto is not null;
+       
+    CURSOR alum_rel is -- Nos da fecha de inicio, fecha de entrega, de cada ejercicio de la relacion, asignatura y alumnno dados
+    select audit_ejer.fecha_inicio, audit_ejer.fecha_entrega_ultima 
+    from audit_ejer 
+    where audit_ejer.relacion_id = rel_relacion_id AND audit_ejer.usuario_id = alu_usuario_id AND asignaturaID = asignatura_id;
+
   BEGIN
     dedic_tiempo_dias := 0;
     dedic_tiempo_horas := 0;
@@ -743,16 +741,20 @@ PROCEDURE DEDICACION_ALU_RELACION(alu_usuario_id IN NUMBER, rel_relacion_id IN N
     select count(*) into existe_user_rel from usuario where usuario_id = alu_usuario_id;
     IF existe_user_rel = 0 then RAISE ER_NO_EXISTE_USER;
     END IF;
-    select count(*) into existe_user_rel from relacion where rel_relacion_id = relacion.relacion_id;
+    select count(*) into existe_user_rel from relacion where rel_relacion_id = relacion.relacion_id AND asignatura_asignatura_id = asignaturaID;
     IF existe_user_rel = 0 then RAISE ER_NO_EXISTE_REL;
     END IF;
   END;
     
     FOR calif IN alum_rel LOOP
-      dedic_tiempo_dias := dedic_tiempo_dias + extract(day from (calif.fecha_entrega_correcto - calif.fecha_inicio)); 
-      dedic_tiempo_horas := dedic_tiempo_horas + extract(hour from (calif.fecha_entrega_correcto - calif.fecha_inicio));
-      dedic_tiempo_minutos := dedic_tiempo_minutos + extract(minute from (calif.fecha_entrega_correcto - calif.fecha_inicio));
-      dedic_tiempo_segundos := dedic_tiempo_segundos + extract (second from (calif.fecha_entrega_correcto - calif.fecha_inicio));
+
+      IF calif.fecha_entrega_ultima IS NOT NULL THEN
+        dedic_tiempo_dias := dedic_tiempo_dias + extract(day from (calif.fecha_entrega_ultima - calif.fecha_inicio));
+        dedic_tiempo_horas := dedic_tiempo_horas + extract(hour from (calif.fecha_entrega_ultima - calif.fecha_inicio));
+        dedic_tiempo_minutos := dedic_tiempo_minutos + extract(minute from (calif.fecha_entrega_ultima - calif.fecha_inicio));
+        dedic_tiempo_segundos := dedic_tiempo_segundos + extract (second from (calif.fecha_entrega_ultima - calif.fecha_inicio));
+      END IF;
+     
     END LOOP;
     /*
     OPEN alum_rel;
@@ -767,7 +769,7 @@ PROCEDURE DEDICACION_ALU_RELACION(alu_usuario_id IN NUMBER, rel_relacion_id IN N
     END LOOP;
     */
     
-  IF alum_rel%ISOPEN = TRUE THEN 
+  IF alum_rel%ISOPEN THEN 
     CLOSE alum_rel;
   END IF;
     
