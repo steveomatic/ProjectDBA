@@ -282,7 +282,16 @@ CREATE TABLE audit_ejer
 
 
 
+  CREATE TABLE REGISTRO_N_MEJORES(	
+    ID_USUARIO NUMBER NOT NULL ENABLE, 
+	  ID_ASIGNATURA NUMBER NOT NULL ENABLE, 
+	  FECHA DATE NOT NULL ENABLE, 
+	  NOMBRE VARCHAR2(256 BYTE), 
+	  PUNTOS NUMBER, 
+	  NOMBRE_ASIGNATURA VARCHAR2(128 BYTE)
+   );
 
+ALTER TABLE ASIGNATURA add N number;
 
 -- Vista auxiliar
 CREATE OR REPLACE VIEW Notas_alu_tema_sin_datos AS
@@ -344,6 +353,18 @@ group by Relacion,NOMBRE,Asignatura;
 
 CREATE OR REPLACE VIEW std_dev_nota_tema AS
 SELECT asignatura_id, usuario, tema, nota, STDDEV(nota) OVER (ORDER BY nota) "StdDev" from notas_alu_por_tema ORDER BY tema;
+
+
+CREATE OR REPLACE FORCE VIEW NOTAS_ALUMNOS_INSERTAR_N ("ASIGNATURAID", "ASIGNATURA", "RELACION", "NOTA", "ALUMNOID", "USUARIO_ID", "NOMBRE", "DNI", "CURSO_ACADEMICO", "GRUPO", "EXPEDIENTE", "Fecha de alta", "Fecha de nacimiento") AS 
+SELECT asignatura.asignatura_id as AsignaturaID, asignatura.nombre as Asignatura, relacion_relacion_id AS Relacion, NOTA,alumno.alumno_id as alumnoID, usuario.usuario_id as usuario_id, alumno.nombre || ' ' || alumno.apellido1 || ' ' ||
+alumno.apellido2 AS Nombre, alumno.dni, curso_academico, grupo, expediente, alumno.fecha_alta AS "Fecha de alta",
+alumno.fecha_nacimiento AS "Fecha de nacimiento"
+FROM Notas_alumnos_sin_datos, usuario, matricula, alumno, asignatura
+WHERE Notas_alumnos_sin_datos.usuario_usuario_id = usuario.usuario_id
+AND matricula.usuario_usuario_id = usuario.usuario_id
+AND matricula.alumno_alumno_id = alumno.alumno_id
+AND matricula.asignatura_asignatura_id = notas_alumnos_sin_datos.asignatura_id
+AND notas_alumnos_sin_datos.asignatura_id = asignatura.asignatura_id;
 
 
 -------------------------------------------------------------------
@@ -558,6 +579,7 @@ CREATE OR REPLACE PACKAGE ESTADISTICAS_ALU AS
   PROCEDURE DEDICACION_ALU_RELACION(alu_usuario_id IN NUMBER, rel_relacion_id IN NUMBER, asignaturaID IN NUMBER);
   PROCEDURE N_MEJORES_ASIGNATURA(asig_id in number, N in number);
   PROCEDURE CORR_EJERCICIO_NOTA(ej_ejercicio_id IN NUMBER);
+  PROCEDURE N_MEJORES_ASIGNATURA_TABLA;
   
 END ESTADISTICAS_ALU;
 /
@@ -1443,6 +1465,76 @@ PROCEDURE CORR_EJERCICIO_NOTA(ej_ejercicio_id IN NUMBER) AS
   WHEN ERROR_NO_DATOS THEN DBMS_OUTPUT.PUT_LINE('No existe el ejercicio.');
   WHEN ERROR_DESCONOCIDO THEN DBMS_OUTPUT.PUT_LINE('Error desconocido.');
   END CORR_EJERCICIO_NOTA;
+  
+ -------------------------------------------------------------------------------------------------------
+ -------------------------------------------------------------------------------------------------------
+ 
+  
+PROCEDURE N_MEJORES_ASIGNATURA_TABLA as 
+  
+  
+  cursor cur_asignaturas is
+  select asignatura_id, N from asignatura;
+  
+  --El cursor recoge la lista de alumnos de esa asignatura junto a sus notas
+  --Ordenados de mayor a menor nota
+  CURSOR alumnos_cursor(asig_id in number)is
+   select asignatura, AsignaturaID,nombre, sum(nota) n, usuario_id from notas_alumnos_insertar_n where asignaturaID=asig_id
+   GROUP BY nombre, asignaturaID, asignatura, usuario_id ORDER BY SUM(nota) desc;
+    
+  usuario_nombre ALUMNO.NOMBRE%TYPE;  --Almacena el nombre del usuario en el bucle
+  cont number :=1;   --Contador para mostrar por pantalla el top y para controlar el límite N
+  puntos number;     --Variable que almacena el número de puntos del usuario en el bucle
+  nombre_asignatura asignatura.nombre%type; 
+
+  BEGIN
+  --hallar todas las asignaturas
+  
+  FOR asig_id in cur_asignaturas loop
+  IF asig_id.N is not null THEN
+     select nombre into nombre_asignatura from asignatura where asignatura_id=asig_id.asignatura_id;
+     
+    FOR al_var in alumnos_cursor(asig_id.asignatura_id) LOOP
+      IF cont<=asig_id.N  THEN
+      usuario_nombre := al_var.nombre;
+      puntos := al_var.n;
+      --Ejemplo: 1. Usu Ariodep Rueba con 78 puntos
+      DBMS_OUTPUT.PUT_LINE(cont||'. '||usuario_nombre ||' con ' || puntos || ' puntos');
+      
+      insert into registro_N_Mejores(id_usuario,nombre_asignatura,id_asignatura,fecha,nombre,puntos)
+      values (al_var.usuario_id,al_var.asignatura,al_var.AsignaturaID,sysdate,al_var.nombre,al_var.n);
+      
+      
+      cont := cont+1;
+      ELSE
+        EXIT;
+      END IF;
+
+    --end alumnos_cursor
+  END LOOP;
+  END IF;
+ 
+ 
+ 
+ 
+ 
+ --end cur_asignatura
+   end loop;
+  
+  
+  
+  --Se recorre la lista de alumnos y se muestran por pantalla los N primeros
+  
+    
+  IF alumnos_cursor%ISOPEN THEN 
+     CLOSE alumnos_cursor;
+  END IF;
+    
+  EXCEPTION
+    WHEN others then
+    DBMS_OUTPUT.PUT_LINE('Error, no se han podido obtener los mejores alumnos');
+  
+  end N_MEJORES_ASIGNATURA_TABLA;
 
 
 END ESTADISTICAS_ALU;
